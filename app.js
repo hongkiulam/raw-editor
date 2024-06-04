@@ -16,8 +16,6 @@ let currentRawImage;
 
 async function run() {
   await init();
-  console.log(raw_editor.ping());
-  raw_editor.bind_loggers();
 
   fileInput?.addEventListener("change", async (event) => {
     const file = fileInput?.files?.[0];
