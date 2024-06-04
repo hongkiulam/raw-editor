@@ -25,6 +25,18 @@ pub struct MyRawImage {
 }
 
 #[wasm_bindgen]
+pub struct Test {
+    test: u32,
+}
+#[wasm_bindgen]
+impl Test {
+    #[wasm_bindgen(getter)]
+    pub fn test(&self) -> u32 {
+        self.test
+    }
+}
+
+#[wasm_bindgen]
 impl MyRawImage {
     // #[wasm_bindgen(getter)] - this allows us to expose this function to JS as a getter i.e. `myRawImage.width` 👍 `myRawImage.width()` 🙅
     #[wasm_bindgen(getter)]
@@ -63,6 +75,11 @@ impl MyRawImage {
         log::info!("increased exposure");
         log::info!("{}", img.get_pixel(0, 0)[0]);
         self.dynamic_image = img.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn test(&self) -> Test {
+        Test { test: 42 }
     }
 }
 
