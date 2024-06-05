@@ -118,8 +118,10 @@ function renderImageData(rawImage) {
     // render picture canvas into another canvas
 
     // Set the desired dimensions
-    const { width: scaledWidth, height: scaledHeight } =
-      getScaledImageDimensions(rawImage);
+    // const { width: scaledWidth, height: scaledHeight } =
+    //   getScaledImageDimensions(rawImage);
+    const scaledWidth = 400;
+    const scaledHeight = scaledWidth * (rawImage.height / rawImage.width )
 
     canvas.width = scaledWidth;
     canvas.height = scaledHeight;
