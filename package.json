@@ -3,11 +3,11 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
+		"build:wasm": "./cli/build:wasm.sh",
 		"predev": "pnpm build:wasm",
 		"dev": "vite dev",
 		"prebuild": "pnpm build:wasm",
 		"build": "vite build",
-		"build:wasm": "wasm-pack build --target web --out-dir raw-processor/pkg",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
