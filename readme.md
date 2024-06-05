@@ -2,6 +2,7 @@
 
 ## Libraries and stack
 
+**Svelte** for the app ui
 **Rust** for handling image processing, compiled to WASM using `wasm-pack`
 **rawler** Raw image processing library, handles decoding image data and metadata, performs basic processing i.e. demosaicing, and provides a `RawDevelop` module for further developing the raw data.
 **image** Image library, which provides many useful utilisies for manipulating images - decoding, encoding etc... Works in conjunction with `rawler`
@@ -22,15 +23,27 @@ devbox shell
 
 ## Running the app
 
+### Development
+
+```
+pnpm dev
+```
+
+This will first run `pnpm build:wasm` to build the wasm module, second a vite plugin will copy the module into node modules, finally the svelte application is ran in development mode
+
 ## Project structure
 
 ```
-rust-raw/
+raw-processor/
 └── lib.rs - 🦀 Main entry point to the rust logic for handling image processing
+src/ - ⚡ Svelte application source code
 devbox.json - 🌍 Defining the devbox development environment i.e. rust, node
+Cargo.toml - 🦀 Where the rust wasm module is configured (dependencies)
 ```
 
 ## Making changes
+
+### Rust WASM - Raw Processor
 
 Changes to the rust raw processing module and the exposed methods that can be used in javascript, edit `rust-raw/lib.rs`
 

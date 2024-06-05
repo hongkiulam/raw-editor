@@ -1,5 +1,5 @@
 // @ts-check
-import init, * as raw_editor from "./rust-raw/wasm";
+import init, * as raw_editor from "raw-processor";
 
 const fileInput = /** @type {HTMLInputElement} */ (
   document.getElementById("fileInput")
