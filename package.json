@@ -4,10 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build:wasm": "wasm-pack build --target web --out-dir rust-raw/wasm",
+    "predev": "pnpm build:wasm",
+    "dev": "pnpm dlx serve .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@9.1.0+sha1.217063ce3fcbf44f3051666f38b810f1ddefee4a"
+  "packageManager": "pnpm@9.1.0+sha1.217063ce3fcbf44f3051666f38b810f1ddefee4a",
+  "devDependencies": {
+    "wasm-pack": "^0.12.1"
+  }
 }

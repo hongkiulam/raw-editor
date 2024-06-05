@@ -12,6 +12,7 @@
 
 - Rust environment
 - Node environment
+  - pnpm
 
 This can be setup using devbox, to enter a pre-configured shell environment:
 
@@ -31,19 +32,19 @@ devbox.json - 🌍 Defining the devbox development environment i.e. rust, node
 
 ## Making changes
 
-Changes to the raw loader and the exposed methods that can be used in javascript, edit `rust-raw/lib.rs`
+Changes to the rust raw processing module and the exposed methods that can be used in javascript, edit `rust-raw/lib.rs`
 
 ## Compilation
 
 To compile to wasm run
 
 ```
-devbox run build
+pnpm build:wasm
 ```
 
 - This will use `wasm-pack` to compile to a wasm target
   - This will compile the file as defined in `Cargo.toml`
-- output can be found in `pkg`
+- output can be found in `rust-raw/wasm`
 - we can then import raw-editor.js into our application and call `init`. This will fetch the wasm binary and instantiate it.
 
 ## Other notes
