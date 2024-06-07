@@ -1,13 +1,20 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	onMount(() => {
-		import('$lib/app');
-	});
+	import { browser } from '$app/environment';
+	import init from 'raw-processor';
 
 	const { children } = $props();
+
+	const initialiseWasm = !browser ? new Promise(() => {}) : init();
 </script>
 
-{@render children()}
+<!-- TODO: move this to +page so we show the loading state inside of the UI layout -->
+{#await initialiseWasm}
+	<p>loading...</p>
+{:then}
+	{@render children()}
+{:catch}
+	<p>failed to load raw-processor</p>
+{/await}
 
 <style>
 	:global(body) {
@@ -18,6 +25,7 @@
 		background-image: radial-gradient(black 1px, transparent 0);
 		background-size: 40px 40px;
 		background-position: -19px -19px;
+		overflow: hidden;
 	}
 	:global(*) {
 		box-sizing: border-box;
@@ -27,5 +35,9 @@
 	}
 	:global(:root) {
 		--bg-rgb: 255, 255, 255;
+		--z-base: 0;
+		--z-above: 1;
+		--z-controls: calc(var(--z-above) + var(--z-canvas));
+		--z-canvas: calc(var(--z-above) + var(--z-base));
 	}
 </style>

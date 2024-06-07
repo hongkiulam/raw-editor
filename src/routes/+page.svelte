@@ -1,10 +1,28 @@
-<aside>
-	<input type="file" id="fileInput" accept=".raw,.nef,.cr2,.arw,.dng" />
-	<button id="button">increase exposure</button>
-</aside>
+<script>
+	import ImageCanvas from '$lib/components/ImageCanvas.svelte';
+	import ImageUpload from '$lib/components/ImageUpload.svelte';
+	import { useRawImage } from '../lib/state/currentRawImage';
+	const { operations } = useRawImage();
+</script>
+
 <main>
-	<canvas id="canvas"></canvas>
+	<ImageCanvas />
 </main>
+<aside>
+	<ImageUpload />
+	<button
+		id="button"
+		onclick={() => {
+			operations.rotate();
+		}}>rotate</button
+	>
+	<button
+		id="button"
+		onclick={() => {
+			operations.increaseExposure();
+		}}>increase exposure</button
+	>
+</aside>
 
 <style>
 	aside {
@@ -16,6 +34,7 @@
 		border-left: 1px solid rgba(0, 0, 0, 0.2);
 		backdrop-filter: blur(50px);
 		background-color: rgba(var(--bg-rgb), 0.1);
+		z-index: var(--z-controls);
 	}
 	main {
 		display: grid;
@@ -23,14 +42,5 @@
 		padding-right: 224px;
 		width: 100%;
 		height: 100%;
-	}
-
-	canvas {
-		/* width: 100%;
-		height: 100%;
-		object-fit: contain; */
-	}
-	input {
-		width: 100%;
 	}
 </style>
