@@ -38,6 +38,9 @@ importers:
       prettier-plugin-svelte:
         specifier: ^3.1.2
         version: 3.2.3(prettier@3.3.1)(svelte@5.0.0-next.149)
+      raw-processor:
+        specifier: link:raw-processor/pkg
+        version: link:raw-processor/pkg
       svelte:
         specifier: ^5.0.0-next.1
         version: 5.0.0-next.149

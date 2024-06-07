@@ -1,9 +1,9 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import copyWasmToNodeModulesFolder from 'vite-plugin-wasm-pack'
 
 export default defineConfig({
-	plugins: [sveltekit(),
-		copyWasmToNodeModulesFolder('./raw-processor')
+	plugins: [
+		sveltekit()
+		// https://vite-pwa-org.netlify.app/frameworks/sveltekit
 	]
 });

@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"build:wasm": "./cli/build:wasm.sh",
+		"build:wasm": "pnpm exec wasm-pack build --target web --out-dir ./raw-processor/pkg",
 		"predev": "pnpm build:wasm",
 		"dev": "vite dev",
 		"prebuild": "pnpm build:wasm",
@@ -25,13 +25,13 @@
 		"globals": "^15.0.0",
 		"prettier": "^3.1.1",
 		"prettier-plugin-svelte": "^3.1.2",
+		"raw-processor": "link:raw-processor/pkg",
 		"svelte": "^5.0.0-next.1",
 		"svelte-check": "^3.6.0",
 		"tslib": "^2.4.1",
 		"typescript": "^5.0.0",
 		"typescript-eslint": "^8.0.0-alpha.20",
 		"vite": "^5.0.3",
-		"vite-plugin-wasm-pack": "^0.1.12",
 		"wasm-pack": "^0.12.1"
 	},
 	"type": "module",
