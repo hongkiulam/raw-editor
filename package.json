@@ -5,10 +5,10 @@
 	"scripts": {
 		"build:wasm": "pnpm exec wasm-pack build --target web --out-dir ./raw-processor/pkg",
 		"predev": "pnpm build:wasm",
-		"dev": "vite dev",
+		"dev": "vite dev --host",
 		"prebuild": "pnpm build:wasm",
 		"build": "vite build",
-		"preview": "vite preview",
+		"preview": "vite preview --host",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",

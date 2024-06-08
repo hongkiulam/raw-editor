@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { useRawImage } from '$lib/state/currentRawImage';
-
-	//TODO: and need to expose functions which can control the canvas i.e. (resetScale) for if we want to use a rotate tool
+	import { useCanvas } from '$lib/state/canvas';
 	const { rawImage, rawImageRGBA } = useRawImage();
+	const canvasState = useCanvas();
 
 	const canvasLogger = (...args: any[]) => console.log('%c CANVAS', 'color: yellow', ...args);
 
@@ -72,6 +72,8 @@
 			ctx.reset();
 			// render the scaled canvas into the overflow canvas, so that we can pan, zoom, across the whole viewport
 			// since we already scaled and positioned with imageCanvas, we can just render to 0,0
+			ctx.translate($canvasState.originX, $canvasState.originY);
+			ctx.scale($canvasState.zoom, $canvasState.zoom);
 			ctx.drawImage(scaledImageSource, 0, 0);
 		}
 	});
@@ -114,7 +116,17 @@
 	bind:clientWidth={imageBoundingArea.width}
 	bind:clientHeight={imageBoundingArea.height}
 ></div>
-<canvas bind:this={interactionCanvas} class="interaction-canvas"></canvas>
+<canvas
+	bind:this={interactionCanvas}
+	class="interaction-canvas"
+	onmousedown={canvasState.eventHandlers.onMouseDown}
+	onmouseup={canvasState.eventHandlers.onMouseUp}
+	onmousemove={canvasState.eventHandlers.onMouseMove}
+	ontouchstart={canvasState.eventHandlers.onTouchStart}
+	ontouchmove={canvasState.eventHandlers.onTouchMove}
+	ontouchend={canvasState.eventHandlers.onTouchEnd}
+	onwheel={canvasState.eventHandlers.onWheel}
+></canvas>
 
 <style>
 	.image-bounding-area {

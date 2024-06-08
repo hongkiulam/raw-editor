@@ -1,6 +1,7 @@
 <script>
 	import ImageCanvas from '$lib/components/ImageCanvas.svelte';
 	import ImageUpload from '$lib/components/ImageUpload.svelte';
+	import ScreenLogger from '../lib/components/ScreenLogger.svelte';
 	import { useRawImage } from '../lib/state/currentRawImage';
 	const { operations } = useRawImage();
 </script>
@@ -22,6 +23,7 @@
 			operations.increaseExposure();
 		}}>increase exposure</button
 	>
+	<ScreenLogger />
 </aside>
 
 <style>
