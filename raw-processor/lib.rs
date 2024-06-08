@@ -74,7 +74,7 @@ impl MyRawImage {
         let img = self.dynamic_image.brighten(1000);
         log::info!("increased exposure");
         log::info!("{}", img.get_pixel(0, 0)[0]);
-        self.dynamic_image = img.clone()
+        self.dynamic_image = img;
     }
 
     #[wasm_bindgen(getter)]
