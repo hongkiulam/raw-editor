@@ -1,4 +1,4 @@
-# Raw Loader
+# Raw Editor
 
 ## Libraries and stack
 
