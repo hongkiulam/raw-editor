@@ -1,9 +1,14 @@
-import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 export default defineConfig({
+	resolve: {
+		alias: {
+			$lib: '/src/lib'
+		}
+	},
 	plugins: [
-		sveltekit()
+		svelte()
 		// https://vite-pwa-org.netlify.app/frameworks/sveltekit
 	]
 });
