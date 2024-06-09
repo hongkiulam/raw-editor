@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as raw_editor from 'raw-processor';
+	import * as raw_editor from '$lib/raw-processor';
 	import { useRawImage } from '../state/currentRawImage';
 
 	const { setRawImage } = useRawImage();

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import init from 'raw-processor';
-
+	import init from '$lib/raw-processor';
 	const { children } = $props();
 
 	const initialiseWasm = !browser ? new Promise(() => {}) : init();

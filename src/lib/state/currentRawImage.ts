@@ -1,4 +1,4 @@
-import type { MyRawImage } from 'raw-processor';
+import type { MyRawImage } from '$lib/raw-processor';
 import { derived, get, writable } from 'svelte/store';
 import { useCanvas } from './canvas';
 const currentRawImageState = writable<MyRawImage | undefined>();

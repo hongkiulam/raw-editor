@@ -65,6 +65,15 @@ pnpm build:wasm
 - output can be found in `rust-raw/wasm`
 - we can then import raw-editor.js into our application and call `init`. This will fetch the wasm binary and instantiate it.
 
+## Linking our WASM module to our Vite project
+
+The simplest, bug-free way of consuming the WASM module was to simply copy it into the Svelte source code `src/lib/raw-processor`
+
+In doing so, I can simply import the WASM Javascript file, without relying on Vite to know how to properly link the file, as was the case when trying:
+
+- `pnpm link`
+- Monorepo style package imports
+
 ## Other notes
 
 - Originally, I wanted to use LibRaw, but with my lack of knowledge around C, it ran into many obstacles in compiling the program to WASM
