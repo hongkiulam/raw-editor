@@ -7,7 +7,7 @@ interface CanvasState {
 	originX: number;
 	originY: number;
 	zoom: number;
-	pinchDistance: number;
+	pinchDistance?: number;
 }
 
 const initialInteractionState: Omit<CanvasState, ''> = {
@@ -17,7 +17,7 @@ const initialInteractionState: Omit<CanvasState, ''> = {
 	originX: 0,
 	originY: 0,
 	zoom: 1,
-	pinchDistance: 0
+	pinchDistance: undefined
 };
 
 const canvasState = writable<CanvasState>({
@@ -43,11 +43,12 @@ export const useCanvas = () => {
 			return state;
 		});
 	};
+
 	const onWheel = (event: WheelEvent) => {
 		handleZoomUpdate(event.deltaY < 0 ? 'IN' : 'OUT', event.offsetX, event.offsetY);
 	};
 
-	const onDragStart = (event: MouseEvent | Touch) => {
+	const onPanStart = (event: MouseEvent | Touch) => {
 		canvasState.update((state) => {
 			state.lastX = 'offsetX' in event ? event.offsetX : event.clientX;
 			state.lastY = 'offsetY' in event ? event.offsetY : event.clientY;
@@ -56,7 +57,7 @@ export const useCanvas = () => {
 		});
 	};
 
-	const onDrag = (event: MouseEvent | Touch) => {
+	const onPan = (event: MouseEvent | Touch) => {
 		const isDragging = get(canvasState).isDragging;
 		if (!isDragging) {
 			return;
@@ -74,7 +75,7 @@ export const useCanvas = () => {
 		});
 	};
 
-	const onDragEnd = () => {
+	const onPanEnd = () => {
 		canvasState.update((state) => {
 			state.isDragging = false;
 			return state;
@@ -83,7 +84,7 @@ export const useCanvas = () => {
 
 	const onTouchStart = (event: TouchEvent) => {
 		if (event.touches.length === 1) {
-			onDragStart(event.touches[0]);
+			onPanStart(event.touches[0]);
 		} else if (event.touches.length === 2) {
 			// Stop dragging, and prevent dragging if we have two fingers on the screen
 			canvasState.update((state) => {
@@ -95,7 +96,7 @@ export const useCanvas = () => {
 
 	const onTouchMove = (event: TouchEvent) => {
 		if (event.touches.length === 1) {
-			onDrag(event.touches[0]);
+			onPan(event.touches[0]);
 		} else if (event.touches.length === 2) {
 			const previousPinchDistance = get(canvasState).pinchDistance;
 			const touch1 = event.touches[0];
@@ -129,9 +130,13 @@ export const useCanvas = () => {
 	};
 
 	const onTouchEnd = (event: TouchEvent) => {
-		onDragEnd();
+		onPanEnd();
 		if (event.touches.length < 2) {
-			// todo
+			// if we have less than two fingers on the screen, reset the pinch distance
+			canvasState.update((state) => {
+				state.pinchDistance = undefined;
+				return state;
+			});
 		}
 	};
 
@@ -143,9 +148,9 @@ export const useCanvas = () => {
 		...readonlyCanvasState,
 		resetInteractions,
 		eventHandlers: {
-			onMouseDown: onDragStart,
-			onMouseMove: onDrag,
-			onMouseUp: onDragEnd,
+			onMouseDown: onPanStart,
+			onMouseMove: onPan,
+			onMouseUp: onPanEnd,
 			onTouchStart,
 			onTouchMove,
 			onTouchEnd,

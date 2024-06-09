@@ -1,27 +1,27 @@
 {
-  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.10.7/.schema/devbox.schema.json",
-  "packages": ["nodejs@22", "rustup@latest", "libiconv@latest"],
-  "env": {
-    "DEVBOX_COREPACK_ENABLED": "true",
-    "See": "https://github.com/rust-lang/rust/issues/90342 👇",
-    "MACOSX_DEPLOYMENT_TARGET": "10.7"
-  },
-  "shell": {
-    "init_hook": [
-      "echo \"Setting up rust...\"",
-      "projectDir=$(dirname $(readlink -f \"$0\"))",
-      "rustupHomeDir=\"$projectDir\"/.rustup",
-      "mkdir -p $rustupHomeDir",
-      "export RUSTUP_HOME=$rustupHomeDir",
-      "export LIBRARY_PATH=$LIBRARY_PATH:\"$projectDir/nix/profile/default/lib\"",
-      "rustup default stable",
-      "echo \"Fetching crates...\"",
-      "cargo fetch",
-      "echo \"Fetching node_modules...\"",
-      "pnpm install"
-    ],
-    "scripts": {
-      "test": ["echo \"Error: no test specified\" && exit 1"]
-    }
-  }
+	"$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.10.7/.schema/devbox.schema.json",
+	"packages": ["nodejs@22", "rustup@latest", "libiconv@latest"],
+	"env": {
+		"DEVBOX_COREPACK_ENABLED": "true",
+		"See": "https://github.com/rust-lang/rust/issues/90342 👇",
+		"MACOSX_DEPLOYMENT_TARGET": "10.7"
+	},
+	"shell": {
+		"init_hook": [
+			"echo \"Setting up rust...\"",
+			"projectDir=$(dirname $(readlink -f \"$0\"))",
+			"rustupHomeDir=\"$projectDir\"/.rustup",
+			"mkdir -p $rustupHomeDir",
+			"export RUSTUP_HOME=$rustupHomeDir",
+			"export LIBRARY_PATH=$LIBRARY_PATH:\"$projectDir/nix/profile/default/lib\"",
+			"rustup default stable",
+			"echo \"Fetching crates...\"",
+			"cargo fetch",
+			"echo \"Fetching node_modules...\"",
+			"pnpm install"
+		],
+		"scripts": {
+			"build": ["pnpm build"]
+		}
+	}
 }

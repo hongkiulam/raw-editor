@@ -4,6 +4,8 @@
 	const { rawImage, rawImageRGBA } = useRawImage();
 	const canvasState = useCanvas();
 
+	// todo, disable system viewport zooming for the canvas area
+	// todo: retain image quality by handling zoom and position in the canvas using the drawImage arguments (on the scaled canvas)
 	const canvasLogger = (...args: any[]) => console.log('%c CANVAS', 'color: yellow', ...args);
 
 	$effect(() => {
@@ -12,6 +14,7 @@
 
 	let imageBoundingArea = $state({ width: 0, height: 0 });
 
+	// TODO: Improve performing, by reducing amount of copies, by drawing to the image source canvas direct from rust, then emit and event to redraw other canvas.
 	let imageSource: HTMLCanvasElement | undefined = $state();
 	$effect(() => {
 		if ($rawImageRGBA && $rawImage) {
