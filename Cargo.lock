@@ -749,6 +749,7 @@ dependencies = [
  "serde-wasm-bindgen",
  "wasm-bindgen",
  "wasm-logger",
+ "web-sys",
 ]
 
 [[package]]

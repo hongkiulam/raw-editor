@@ -10,6 +10,14 @@ use rawler::{
 };
 use std::panic;
 
+// This function allows us to dispatch events from rust
+fn dispatch_custom_event(type_: &str) {
+    let window = web_sys::window().expect("should have a window in this context");
+
+    let event = web_sys::Event::new(type_).unwrap();
+    let _ = window.dispatch_event(&event);
+}
+
 // TODO rename
 // ℹ️ Since this is a struct which is directly exposed to JS (as a return value), we need to ensure that any
 // public fields are serializable to JS.
@@ -66,7 +74,6 @@ impl MyRawImage {
     // pub functions are automatically exposed
     pub fn rotate_image(&mut self) {
         let img = self.dynamic_image.rotate90();
-
         self.dynamic_image = img;
     }
 
@@ -90,17 +97,17 @@ impl MyRawImage {
 pub fn decode_raw_image(data: &[u8]) -> Result<MyRawImage, JsValue> {
     let buf = Buffer::from(data.to_vec());
     let mut rawfile = RawFile::from(buf);
-    log::info!("got rawfile");
+    log::info!("Got raw file");
 
     let decoder_params = RawDecodeParams { image_index: 0 };
 
     if let Ok(decoder) = get_decoder(&mut rawfile) {
-        log::info!("successfully got decoder for rawfile");
+        log::info!("Successfully got decoder for rawfile");
 
         let metadata = decoder
             .raw_metadata(&mut rawfile, decoder_params.clone())
             .map_err(|e| JsValue::from_str(&e.to_string()))?;
-        log::info!("decoded metadata");
+        log::info!("Decoded metadata");
         // 👆 the ? operator at the end is used by Rust to propagate errors up the call stack
         // however, the error from .raw_image (RawlerError) is not compatible with JsValue (the return type of this function)
         // so we need to convert it to a string first

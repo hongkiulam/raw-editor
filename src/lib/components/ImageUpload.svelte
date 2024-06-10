@@ -9,7 +9,6 @@
 	type="file"
 	accept=".raw,.nef,.cr2,.arw,.dng"
 	onchange={async (e) => {
-		console.log(e);
 		const file = e.currentTarget?.files?.[0];
 		if (!file) return;
 		const arrayBuffer = await file.arrayBuffer();

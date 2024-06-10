@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { useRawImage } from '$lib/state/currentRawImage';
 	import { useCanvas } from '$lib/state/canvas';
-	const { rawImage, rawImageRGBA } = useRawImage();
+	import type { MyRawImage } from '$lib/raw-processor/raw_processor';
+	const { rawImage, imageHasMutated } = useRawImage();
 	const canvasState = useCanvas();
 
 	// todo, disable system viewport zooming for the canvas area
@@ -16,24 +17,28 @@
 
 	// TODO: Improve performing, by reducing amount of copies, by drawing to the image source canvas direct from rust, then emit and event to redraw other canvas.
 	let imageSource: HTMLCanvasElement | undefined = $state();
-	$effect(() => {
-		if ($rawImageRGBA && $rawImage) {
-			canvasLogger('Redrawing image source');
-			const canvas = document.createElement('canvas');
-			// Set the image source to be the size as the raw image
-			canvas.width = $rawImage.width;
-			canvas.height = $rawImage.height;
+	const drawImageSource = (rawImage: MyRawImage) => {
+		canvasLogger('Redrawing image source');
+		const canvas = document.createElement('canvas');
+		// Set the image source to be the size as the raw image
+		canvas.width = rawImage.width;
+		canvas.height = rawImage.height;
 
-			const ctx = canvas.getContext('2d');
-			if (!ctx) {
-				throw new Error('Could not get context');
-			}
-			const imageData = ctx.createImageData($rawImage.width, $rawImage.height);
-			// this is not using state atm, so beware of diverging data (shouldnt tho)
-			imageData.data.set($rawImageRGBA);
-			ctx.reset();
-			ctx.putImageData(imageData, 0, 0);
-			imageSource = canvas;
+		const ctx = canvas.getContext('2d');
+		if (!ctx) {
+			throw new Error('Could not get context');
+		}
+		const imageData = ctx.createImageData(rawImage.width, rawImage.height);
+		// this is not using state atm, so beware of diverging data (shouldnt tho)
+		imageData.data.set(rawImage.image_as_rgba8);
+		ctx.reset();
+		ctx.putImageData(imageData, 0, 0);
+		imageSource = canvas;
+	};
+	$effect(() => {
+		// Any time the raw image changes (the file has changed), or the image mutates (same file, but operated on)
+		if ($imageHasMutated && $rawImage) {
+			return drawImageSource($rawImage);
 		}
 	});
 
