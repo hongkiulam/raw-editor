@@ -2,6 +2,7 @@
 	import ImageCanvas from '$lib/components/ImageCanvas.svelte';
 	import ImageUpload from '$lib/components/ImageUpload.svelte';
 	import ScreenLogger from '../lib/components/ScreenLogger.svelte';
+	import Exposure from '../lib/components/operations/Exposure.svelte';
 	import { useRawImage } from '../lib/state/currentRawImage';
 	const { operations } = useRawImage();
 </script>
@@ -11,6 +12,7 @@
 </main>
 <aside>
 	<ImageUpload />
+	<Exposure />
 	<button
 		id="button"
 		onclick={() => {
