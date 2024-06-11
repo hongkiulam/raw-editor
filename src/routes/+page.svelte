@@ -1,10 +1,11 @@
 <script>
+	import { Edits } from '$lib/raw-processor';
 	import ImageCanvas from '$lib/components/ImageCanvas.svelte';
 	import ImageUpload from '$lib/components/ImageUpload.svelte';
 	import ScreenLogger from '../lib/components/ScreenLogger.svelte';
 	import Exposure from '../lib/components/operations/Exposure.svelte';
-	import { useRawImage } from '../lib/state/currentRawImage';
-	const { operations } = useRawImage();
+	import { useRawImage } from '../lib/state/useRawImage';
+	import { onMount } from 'svelte';
 </script>
 
 <main>
@@ -14,18 +15,33 @@
 	<ImageUpload />
 	<Exposure />
 	<button
+		onclick={() => {
+			// console.log($edits);
+			// console.log($decodedImage?.process_edits($edits));
+			// const edits = new Edits();
+			// console.log($rawImage?.edits);
+			// if ($rawImage) {
+			// 	$rawImage.edits.exposure = 0.5;
+			// }
+			// console.log($rawImage?.edits);
+		}}
+	>
+		change edits
+	</button>
+	<button
 		id="button"
 		onclick={() => {
-			operations.rotate();
+			// operations.rotate();
+			// $decodedImage;
 		}}>rotate</button
 	>
 	<button
 		id="button"
 		onclick={() => {
-			operations.increaseExposure();
+			// operations.increaseExposure();
 		}}>increase exposure</button
 	>
-	<ScreenLogger />
+	<!-- <ScreenLogger /> -->
 </aside>
 
 <style>

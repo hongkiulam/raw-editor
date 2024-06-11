@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { useRawImage } from '$lib/state/currentRawImage';
+	import { useRawImage } from '$lib/state/useRawImage';
 	import { useCanvas } from '$lib/state/canvas';
-	import type { MyRawImage } from '$lib/raw-processor/raw_processor';
-	const { rawImage, imageHasMutated } = useRawImage();
+	import type { RawFile } from '$lib/raw-processor/raw_processor';
+	const { rawFile, editedImageRGBA } = useRawImage();
 	const canvasState = useCanvas();
 
 	// todo, disable system viewport zooming for the canvas area
@@ -10,35 +10,35 @@
 	const canvasLogger = (...args: any[]) => console.log('%c CANVAS', 'color: yellow', ...args);
 
 	$effect(() => {
-		console.log('rawImage', $rawImage);
+		console.log('rawImage', $rawFile);
 	});
 
 	let imageBoundingArea = $state({ width: 0, height: 0 });
 
 	// TODO: Improve performing, by reducing amount of copies, by drawing to the image source canvas direct from rust, then emit and event to redraw other canvas.
 	let imageSource: HTMLCanvasElement | undefined = $state();
-	const drawImageSource = (rawImage: MyRawImage) => {
+	const drawImageSource = (rawFile: RawFile, editedImageRGBA: Uint8Array) => {
 		canvasLogger('Redrawing image source');
 		const canvas = document.createElement('canvas');
 		// Set the image source to be the size as the raw image
-		canvas.width = rawImage.width;
-		canvas.height = rawImage.height;
+		canvas.width = rawFile.width;
+		canvas.height = rawFile.height;
 
 		const ctx = canvas.getContext('2d');
 		if (!ctx) {
 			throw new Error('Could not get context');
 		}
-		const imageData = ctx.createImageData(rawImage.width, rawImage.height);
+		const imageData = ctx.createImageData(rawFile.width, rawFile.height);
 		// this is not using state atm, so beware of diverging data (shouldnt tho)
-		imageData.data.set(rawImage.image_as_rgba8);
+		imageData.data.set(editedImageRGBA);
 		ctx.reset();
 		ctx.putImageData(imageData, 0, 0);
 		imageSource = canvas;
 	};
 	$effect(() => {
 		// Any time the raw image changes (the file has changed), or the image mutates (same file, but operated on)
-		if ($imageHasMutated && $rawImage) {
-			return drawImageSource($rawImage);
+		if ($editedImageRGBA && $rawFile) {
+			return drawImageSource($rawFile, $editedImageRGBA);
 		}
 	});
 

@@ -1,6 +1,6 @@
 // @ts-check
 import init, * as raw_editor from 'raw-processor';
-import { currentRawImage as currentRawImageState } from './state/currentRawImage';
+import { currentRawImage as currentRawImageState } from './state/useRawImage';
 
 const fileInput = /** @type {HTMLInputElement} */ document.getElementById('fileInput');
 const button = /** @type {HTMLButtonElement} */ document.getElementById('button');
