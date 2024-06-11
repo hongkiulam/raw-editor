@@ -15,6 +15,8 @@ image = "0.24" # this matches the version used by rawler
 serde = { version = "1.0.203", features = ["derive"] } # derive allows types to be derived from serde
 serde-wasm-bindgen = "0.6.5"
 web-sys = {version="0.3.69", features = ["Event", "EventTarget", "Window"]}
+tokio = "1.38.0"
+wasm-bindgen-futures = "0.4.42"
 
 [lib]
 crate-type = ["cdylib"]

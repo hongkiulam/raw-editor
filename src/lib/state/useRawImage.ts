@@ -19,17 +19,14 @@ export const useRawImage = () => {
 		[fileName, imageEditsByFileName],
 		([fileName, imageEditsByFileName]) => imageEditsByFileName[fileName]
 	);
-	const renewRGBA = () => {
-		imageHasMutated.set({});
-	};
 
-	const processEdits = () => {
+	const processEdits = async () => {
 		const dI = get(rawFile);
 
 		if (!dI) return;
-		console.log('gettingedits', get(edits));
+		console.log('gettingedits', get(edits).exposure);
 
-		const newRGBA = dI.process_edits(get(edits));
+		const newRGBA = await dI.process_edits(get(edits));
 		currentRawImageState.update((state) => {
 			state.editedImageRGBA = newRGBA;
 			return state;
@@ -54,14 +51,15 @@ export const useRawImage = () => {
 		});
 	};
 
-	const updateEdits = <Key extends keyof Edits>(key: Key, value: Edits[Key]) => {
+	const updateEdits = async <Key extends keyof Edits>(key: Key, value: Edits[Key]) => {
 		const fN = get(fileName);
 		if (!fN) return;
 		imageEditsByFileName.update((state) => {
 			state[fN][key] = value;
 			return state;
 		});
-		processEdits();
+		console.log('update?');
+		await processEdits();
 	};
 
 	const operations = {
@@ -70,12 +68,10 @@ export const useRawImage = () => {
 			// myRawImage?.ops.increase_exposure(myRawImage, multiplier);
 
 			// get(currentRawImageState)?.ops.increase_exposure();
-			renewRGBA();
 		},
 		rotate: () => {
 			// get(currentRawImageState)?.rotate_image();
 			resetInteractions();
-			renewRGBA();
 		}
 	};
 

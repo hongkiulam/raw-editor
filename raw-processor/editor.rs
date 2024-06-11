@@ -59,14 +59,20 @@ impl Editor {
         // ri.dynamic_image = new_img;
     }
 
-    fn rotate_image(&self, img: &mut DynamicImage) {
-        let img = img.rotate90();
+    fn rotate_image(&self, mut img: &mut DynamicImage, rotation: u16) {
+        let mut newimg = match rotation {
+            90 => img.rotate90(),
+            180 => img.rotate180(),
+            270 => img.rotate270(),
+            _ => img.clone(),
+        };
     }
 
     pub fn process(&self) -> DynamicImage {
         let mut img = self.dynamic_image.clone();
         let edits = self.edits.clone();
         self.exposure(&mut img, edits.exposure());
+        self.rotate_image(&mut img, edits.rotation());
 
         img.clone()
     }

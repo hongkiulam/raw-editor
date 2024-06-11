@@ -5,18 +5,17 @@ use wasm_bindgen::prelude::*;
 #[derive(Clone, Serialize)]
 pub struct Edits {
     exposure: f32,
+    rotation: u16,
 }
 
 #[wasm_bindgen]
 impl Edits {
-    pub fn default() -> Result<JsValue, JsValue> {
-        serde_wasm_bindgen::to_value(&Edits { exposure: 0.0 })
-            .map_err(|e| JsValue::from_str(&e.to_string()))
-    }
-
     #[wasm_bindgen(constructor)]
     pub fn new() -> Edits {
-        Edits { exposure: 0.0 }
+        Edits {
+            exposure: 0.0,
+            rotation: 90,
+        }
     }
 
     #[wasm_bindgen(getter)]
@@ -27,8 +26,12 @@ impl Edits {
     pub fn set_exposure(&mut self, value: f32) {
         self.exposure = value
     }
-
-    pub fn do_clone(&self) -> Edits {
-        self.clone()
+    #[wasm_bindgen(getter)]
+    pub fn rotation(&self) -> u16 {
+        self.rotation
+    }
+    #[wasm_bindgen(setter)]
+    pub fn set_rotation(&mut self, value: u16) {
+        self.rotation = value
     }
 }
