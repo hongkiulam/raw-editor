@@ -47,7 +47,6 @@
 
 	let isStickingToBase = false;
 	const maxStickDistance = 5 * step;
-	let currentStickDistance = 0;
 
 	// This ensures that whenever the range changes, we eagerly accept the changes value, and set the opposing value to the base
 	// e.g. The current range is [-0.5,0], assuming 0 is the base value
@@ -70,22 +69,11 @@
 		const nextValue = getSingleValueFromRange(nextWithBase);
 
 		if (isStickingToBase) {
-			currentStickDistance += (nextValue > base ? 1 : -1) * step;
+			const upperBound = base + maxStickDistance;
+			const lowerBound = base - maxStickDistance;
 
-			// If we are above the threshold, release the stick, and set the value to the current distance
-			// we get the absolute value of the distance, so we can compare it to the maxStickDistance
-			if (Math.abs(currentStickDistance) > maxStickDistance) {
+			if (nextValue <= lowerBound || nextValue >= upperBound) {
 				isStickingToBase = false;
-				// We should release the stick, and set the value to the base + the distance they tried to move
-				const stickReleasedValue = base + currentStickDistance;
-				// update the current value. Since its a range, we need to set the correct index
-				if (nextValue > base) {
-					nextWithBase[1] = stickReleasedValue;
-				} else {
-					nextWithBase[0] = stickReleasedValue;
-				}
-				// reset stick distance, ready for next time
-				currentStickDistance = 0;
 				return nextWithBase;
 			} else {
 				// We are still sticking to the base, so we should return the current value
