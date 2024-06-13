@@ -14,7 +14,7 @@ impl Edits {
     pub fn new() -> Edits {
         Edits {
             exposure: 0.0,
-            rotation: 90,
+            rotation: 0,
         }
     }
 
