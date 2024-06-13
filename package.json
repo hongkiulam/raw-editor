@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"build:wasm": "pnpm exec wasm-pack build --target web --out-dir ./src/lib/raw-processor",
+		"build:wasm": "./cli/build:wasm.sh",
 		"predev": "pnpm build:wasm",
 		"dev": "vite dev --host",
 		"prebuild": "pnpm build:wasm",
