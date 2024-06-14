@@ -1,13 +1,19 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import init from '$lib/raw-processor';
+	import init, { initThreadPool } from '$lib/raw-processor';
+	import { rawProcessorCall } from '../lib/workers';
 	const { children } = $props();
 
-	const initialiseWasm = !browser ? new Promise(() => {}) : init();
+	const initialiseWasm = async () => {
+		await rawProcessorCall('init', undefined);
+		// await init();
+		// await initThreadPool(navigator.hardwareConcurrency);
+	};
+	const isomorphicInitWasm = !browser ? new Promise(() => {}) : initialiseWasm();
 </script>
 
 <!-- TODO: move this to +page so we show the loading state inside of the UI layout -->
-{#await initialiseWasm}
+{#await isomorphicInitWasm}
 	<p>loading...</p>
 {:then}
 	{@render children()}

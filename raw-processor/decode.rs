@@ -36,7 +36,17 @@ pub fn decode_raw_image(data: &[u8]) -> Result<(RawMetadata, DynamicImage), JsVa
 
         let dev = RawDevelop::default();
         log::info!("got rawimage developer");
-        let developed_img = dev.develop_intermediate(&rawimage).unwrap();
+        log::info!("got rawimage developer2");
+        // TODO: here is where we get the error 'unreachable'. not sure why the panic hook is not picking it up, but it is being thrown from within
+        // the rawler crate. From expand_bayer_rgb -> out.pixels_mut().par_chunks_exact_mut()
+        let developed_img = dev.develop_intermediate(&rawimage).unwrap_throw();
+        // log::info!("got rawimage developer3");
+        // match developed_img_result {
+        //     Ok(_) => log::info!("developed image"),
+        //     Err(ref e) => log::info!("Error developing image: {:?}", e),
+        // }
+        // // if developed_img is error, return error
+        // let developed_img = developed_img_result.unwrap();
         log::info!("got developed image");
 
         let mut dynamic_image = developed_img.to_dynamic_image().unwrap();

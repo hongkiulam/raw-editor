@@ -74,6 +74,6 @@ impl Editor {
         self.exposure(&mut img, edits.exposure());
         self.rotate_image(&mut img, edits.rotation());
 
-        img.clone()
+        img
     }
 }

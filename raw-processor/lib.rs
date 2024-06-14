@@ -16,6 +16,11 @@ use rawler::{
 use std::panic;
 use web_sys::js_sys::Promise;
 
+// TODO Since adding this, larger images get a runtime error when decoding
+// TODO, its due to panics being aborted immediately https://users.rust-lang.org/t/js-catch-wasm-out-of-memory/79554/12
+// Re-export the `initThreadPool` function from the `wasm_bindgen_rayon` crate.
+pub use wasm_bindgen_rayon::init_thread_pool;
+
 // This function allows us to dispatch events from rust
 fn dispatch_custom_event(type_: &str) {
     let window = web_sys::window().expect("should have a window in this context");
@@ -75,24 +80,25 @@ impl RawFile {
         img.into_rgba8().to_vec()
     }
 
-    #[wasm_bindgen]
-    pub fn process_edits(&self, edits: &Edits) -> Promise {
-        let cloned_self = self.clone();
-        let cloned_edits = edits.clone();
-        let future = async move {
-            let mut img = cloned_self.dynamic_image.clone();
-            let processed_img = Editor {
-                edits: cloned_edits,
-                dynamic_image: img,
-            }
-            .process();
-            let vec = processed_img.into_rgba8().to_vec();
-            let js_value = serde_wasm_bindgen::to_value(&vec)
-                .map_err(|e| JsValue::from_str(&e.to_string()))?;
-            Ok(js_value)
-        };
-        wasm_bindgen_futures::future_to_promise(future)
-    }
+    // todo, disabled futures for now, we might not need it if we are using workers
+    // #[wasm_bindgen]
+    // pub fn process_edits(&self, edits: &Edits) -> Promise {
+    //     let cloned_self = self.clone();
+    //     let cloned_edits = edits.clone();
+    //     let future = async move {
+    //         let mut img = cloned_self.dynamic_image.clone();
+    //         let processed_img = Editor {
+    //             edits: cloned_edits,
+    //             dynamic_image: img,
+    //         }
+    //         .process();
+    //         let vec = processed_img.into_rgba8().to_vec();
+    //         let js_value = serde_wasm_bindgen::to_value(&vec)
+    //             .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    //         Ok(js_value)
+    //     };
+    //     wasm_bindgen_futures::future_to_promise(future)
+    // }
 
     // pub fn process_edits(&self, edits: &Edits) -> Vec<u8> {
     //     let mut img = self.dynamic_image.clone();

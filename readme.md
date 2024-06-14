@@ -74,6 +74,21 @@ In doing so, I can simply import the WASM Javascript file, without relying on Vi
 - `pnpm link`
 - Monorepo style package imports
 
+## Concurrency
+
+`wasm-bindgen-rayon`
+
+follwing setup as described in their README
+
+- using nightly rust to allow -Z build-std...
+- customisation RUSTFLAGS, to enable atomics and bulk-memory features
+- enabling COOP, and COEP to allow the use of SharedArrayBuffer (Sveltekit hooks) TODO
+
+## Freeing the UI Main Thread
+
+- Image processing is a CPU intensive task, if the functions are invoked on the main thread, it would pause all UI interactions for the duration of the invocation.
+- To mitigate this, the image prcessing code can be executed from a Web Worker
+
 ## Other notes
 
 - Originally, I wanted to use LibRaw, but with my lack of knowledge around C, it ran into many obstacles in compiling the program to WASM

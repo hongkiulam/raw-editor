@@ -754,11 +754,11 @@ dependencies = [
  "image",
  "log",
  "rawler",
+ "rayon",
  "serde",
  "serde-wasm-bindgen",
  "tokio",
  "wasm-bindgen",
- "wasm-bindgen-futures",
  "wasm-bindgen-rayon",
  "wasm-logger",
  "web-sys",
@@ -1105,18 +1105,6 @@ dependencies = [
  "quote",
  "syn 2.0.65",
  "wasm-bindgen-shared",
-]
-
-[[package]]
-name = "wasm-bindgen-futures"
-version = "0.4.42"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "76bc14366121efc8dbb487ab05bcc9d346b3b5ec0eaa76e46594cabbe51762c0"
-dependencies = [
- "cfg-if",
- "js-sys",
- "wasm-bindgen",
- "web-sys",
 ]
 
 [[package]]

@@ -16,8 +16,9 @@ serde = { version = "1.0.203", features = ["derive"] } # derive allows types to 
 serde-wasm-bindgen = "0.6.5"
 web-sys = {version="0.3.69", features = ["Event", "EventTarget", "Window"]}
 tokio = "1.38.0"
-wasm-bindgen-futures = "0.4.42"
+# wasm-bindgen-futures = "0.4.42"
 wasm-bindgen-rayon = "1.2.1"
+rayon = "1.8.1"
 
 [lib]
 crate-type = ["cdylib"]
