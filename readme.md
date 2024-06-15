@@ -1,4 +1,10 @@
-# Raw Editor
+### todo
+
+- storing edits either JS side or Rust side, and allow for reconciliation
+- excalidraw system diagram
+- loading states
+
+# 🚧 Raw Editor
 
 ## Libraries and stack
 
@@ -15,6 +21,12 @@
 **wasm_logger** another great library for binding the `log` create to the browser console
 
 **comlink** A small RPC library for Web Workers
+
+## System Diagram
+
+Goto: [https://excalidraw.com/](https://excalidraw.com/)
+
+Then, via the hamburger menu, click Open, and open [system-diagram.excalidraw](./system-diagram.excalidraw)
 
 ## Prerequisites
 
@@ -36,15 +48,21 @@ devbox shell
 pnpm dev
 ```
 
-This will first run `pnpm build:wasm` to build the wasm module, second a vite plugin will copy the module into node modules, finally the svelte application is ran in development mode
+This will first run `pnpm build:wasm` to build the wasm module, then, it will start the Svelte dev server.
+
+> as part of `pnpm build:wasm`, the WASM files are output into `src/lib/raw-processor`, allowing for the Svelte code (on in this case the worker files) to import the WASM code.
 
 ## Project structure
 
 ```
 raw-processor/
-└── pkg/ - 📦 The compiled WASM code - this will exist upon running `pnpm build:wasm`
 └── lib.rs - 🦀 Main entry point to the rust logic for handling image processing
 src/ - ⚡ Svelte application source code
+└── lib/ - components, state etc... general UI code can be found here
+    └── raw-processor/ - 📦 🦀 The compiled WASM code - this will exist upon running `pnpm build:wasm`
+    └── components/ - UI components
+    └── workers/ - Web Worker files
+└── routes/ - where the pages are defined
 devbox.json - 🌍 Defining the devbox development environment i.e. rust, node
 Cargo.toml - 🦀 Where the rust wasm module is configured (dependencies)
 ```
@@ -53,7 +71,7 @@ Cargo.toml - 🦀 Where the rust wasm module is configured (dependencies)
 
 ### Rust WASM - Raw Processor
 
-To update the rust raw processing module, and the exposed methods (that can be used in javascript), edit `raw-processor/lib.rs`
+To update the rust raw processing module, and the exposed methods (that can be used in javascript), edit `raw-processor/lib.rs`, or any related `.rs` file inside of `raw-processor/`
 
 ### Svelte UI
 
@@ -69,7 +87,7 @@ pnpm build:wasm
 
 - This will use `wasm-pack` to compile to a wasm target
   - This will compile the file as defined in `Cargo.toml`
-- output can be found in `rust-raw/wasm`
+- output can be found in `src/lib/raw-processor/`
 - we can then import raw-editor.js into our application and call `init`. This will fetch the wasm binary and instantiate it.
 
 ## Linking our WASM module to our Vite project
@@ -91,7 +109,7 @@ follwing setup as described in their README
 - customisation RUSTFLAGS, to enable atomics and bulk-memory features
 - enabling COOP, and COEP to allow the use of SharedArrayBuffer (Sveltekit hooks) TODO
 
-This would be ideal, however, attempting to implement posed some issues which I could not address. So the solution for now is not optimised for speed.
+This would be ideal, however, my attempts to implement this ran into some issues which I struggled to address. So the solution for now is not optimised for speed.
 
 ## Freeing the UI Main Thread
 
@@ -103,9 +121,6 @@ This would be ideal, however, attempting to implement posed some issues which I 
 - Originally, I wanted to use LibRaw, but with my lack of knowledge around C, it ran into many obstacles in compiling the program to WASM
 - The start of this project (not in git history) used `rawloader` and `imagepipe` by pedrocr, for processing the raw files. However, this was very quickly replaced with `rawler` as `rawler` was less of a black box and provided a more transparent API interface for manipulating the raw files.
 - I am using a custom fork of ~~`imagepipe`~~ `rawler`, this is because the original library used `std::time` for logging. However, this is unavailable in WebAssembly at runtime. The forked library removes this logging.
-- For me, the best way of consuming the WASM module in Vite was to use `pnpm link`. To create that link, I ran `pnpm add ./raw-processor/pkg -D`. As long as the WASM module exists in `raw-processor/pkg`, Vite would pick it up and allow importing from `raw-processor`. There is some black magic involved with `pnpm link` which meant that the module is treated as an asset and accessible correctly from `//host/wasm_files`. Lastly, to ensure the availability of the WASM code, I have added `pre-` scripts to `dev` and `build` which build the WASM module.
-
-### Canvas Stack
 
 ## Glossary
 
@@ -116,7 +131,10 @@ what is CFA (TODO)
 
 ## Credits & Inspiration
 
+Big shoutout to these libraries
+
 - `rawloader`
 - `imagepipe`
 - `rawler`
 - `tokyo`
+- `comlink`
