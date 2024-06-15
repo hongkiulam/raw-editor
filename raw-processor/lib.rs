@@ -14,12 +14,6 @@ use rawler::{
     get_decoder,
 };
 use std::panic;
-use web_sys::js_sys::Promise;
-
-// TODO Since adding this, larger images get a runtime error when decoding
-// TODO, its due to panics being aborted immediately https://users.rust-lang.org/t/js-catch-wasm-out-of-memory/79554/12
-// Re-export the `initThreadPool` function from the `wasm_bindgen_rayon` crate.
-pub use wasm_bindgen_rayon::init_thread_pool;
 
 // This function allows us to dispatch events from rust
 fn dispatch_custom_event(type_: &str) {

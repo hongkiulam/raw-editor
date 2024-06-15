@@ -3,11 +3,18 @@
 ## Libraries and stack
 
 **Svelte** for the app ui
+
 **Rust** for handling image processing, compiled to WASM using `wasm-pack`
+
 **rawler** Raw image processing library, handles decoding image data and metadata, performs basic processing i.e. demosaicing, and provides a `RawDevelop` module for further developing the raw data.
+
 **image** Image library, which provides many useful utilisies for manipulating images - decoding, encoding etc... Works in conjunction with `rawler`
+
 **console_error_panic_hook** brilliant library for surfacing panic messages from rust, straight to the javascript console
+
 **wasm_logger** another great library for binding the `log` create to the browser console
+
+**comlink** A small RPC library for Web Workers
 
 ## Prerequisites
 
@@ -83,6 +90,8 @@ follwing setup as described in their README
 - using nightly rust to allow -Z build-std...
 - customisation RUSTFLAGS, to enable atomics and bulk-memory features
 - enabling COOP, and COEP to allow the use of SharedArrayBuffer (Sveltekit hooks) TODO
+
+This would be ideal, however, attempting to implement posed some issues which I could not address. So the solution for now is not optimised for speed.
 
 ## Freeing the UI Main Thread
 

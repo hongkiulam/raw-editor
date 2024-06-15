@@ -29,6 +29,9 @@ importers:
       '@types/eslint':
         specifier: ^8.56.7
         version: 8.56.10
+      comlink:
+        specifier: ^4.4.1
+        version: 4.4.1
       eslint:
         specifier: ^9.0.0
         version: 9.4.0
@@ -587,6 +590,9 @@ packages:
 
   color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
+
+  comlink@4.4.1:
+    resolution: {integrity: sha512-+1dlx0aY5Jo1vHy/tSsIGpSkN4tS9rZSW8FIhG0JH/crs9wwweswIo/POr451r7bZww3hFbPAKnTpimzL/mm4Q==}
 
   concat-map@0.0.1:
     resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
@@ -1819,6 +1825,8 @@ snapshots:
       color-name: 1.1.4
 
   color-name@1.1.4: {}
+
+  comlink@4.4.1: {}
 
   concat-map@0.0.1: {}
 

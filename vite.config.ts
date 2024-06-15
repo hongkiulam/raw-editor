@@ -8,9 +8,10 @@ export default defineConfig({
 	],
 	server: {
 		// allow SharedArrayBuffer usage
-		headers: {
-			'Cross-Origin-Opener-Policy': 'same-origin',
-			'Cross-Origin-Embedder-Policy': 'require-corp'
-		}
+		// Not needed ATM
+		// headers: {
+		// 	'Cross-Origin-Opener-Policy': 'same-origin',
+		// 	'Cross-Origin-Embedder-Policy': 'require-corp'
+		// }
 	}
 });

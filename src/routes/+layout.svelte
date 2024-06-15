@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import init, { initThreadPool } from '$lib/raw-processor';
-	import { rawProcessorCall } from '../lib/workers';
+	import { rawProcessorWorker } from '../lib/workers';
 	const { children } = $props();
 
 	const initialiseWasm = async () => {
-		await rawProcessorCall('init', undefined);
+		const mess = await rawProcessorWorker.init();
+		console.log(mess);
 		// await init();
 		// await initThreadPool(navigator.hardwareConcurrency);
 	};
