@@ -1,11 +1,8 @@
 <script>
-	import { Edits } from '$lib/raw-processor';
 	import ImageCanvas from '$lib/components/ImageCanvas.svelte';
 	import ImageUpload from '$lib/components/ImageUpload.svelte';
 	import ScreenLogger from '../lib/components/ScreenLogger.svelte';
 	import Exposure from '../lib/components/operations/Exposure.svelte';
-	import { useRawImage } from '../lib/state/useRawImage';
-	import { onMount } from 'svelte';
 </script>
 
 <main>

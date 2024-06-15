@@ -36,7 +36,7 @@ const rawProcessorWorkerStub = {
 	decode: async () => null
 } as unknown as RawProcessorWorker;
 
-export const rawProcessorWorker =
+export const rawProcessorWorker: RawProcessorWorker =
 	typeof window === 'undefined'
 		? rawProcessorWorkerStub
 		: Comlink.wrap<RawProcessorWorker>(

@@ -2,53 +2,48 @@ import * as Comlink from 'comlink';
 import init, * as raw_editor from '$lib/raw-processor';
 import { get, writable } from 'svelte/store';
 
-// self.onmessage = async function (e) {
-// 	const { eventType, eventData, id } = e.data;
-
-// 	switch (eventType) {
-// 		case 'init':
-// 			await init();
-// 			self.postMessage({ eventType, id, eventData: 'callback' });
-// 			break;
-// 		case 'decode':
-// 			console.log('decoding raw file');
-// 			const rawFile = raw_editor.RawFile.decode(eventData);
-// 			console.log(rawFile);
-// 			self.postMessage({ eventType, id, eventData: rawFile });
-// 			break;
-// 	}
-// };
-
 // worker.ts
-const currentRawFileInstance = writable<raw_editor.RawFile | undefined>(undefined);
+let currentImageProcessor: raw_editor.ImageProcessor | undefined = undefined;
+const currentRGBA = writable<Uint8Array | undefined>(undefined);
 
-const serialisedRawFile = (rawFile: raw_editor.RawFile) => {
+const serialisedImageData = (rawFile: raw_editor.ImageProcessor, rgba: Uint8Array) => {
 	return {
 		width: rawFile.width,
 		height: rawFile.height,
 		metadata: rawFile.metadata,
-		image_as_rgba8: rawFile.image_as_rgba8
+		image_as_rgba8: rgba
 	};
 };
-export type SerialisedRawFile = ReturnType<typeof serialisedRawFile>;
+export type SerialisedImageData = ReturnType<typeof serialisedImageData>;
 
 const rawProcessorWorker = {
 	init: async () => {
 		await init();
 	},
-	decode: async (rawFile: Uint8Array) => {
-		const decodedRawFile = raw_editor.RawFile.decode(rawFile);
-		currentRawFileInstance.set(decodedRawFile);
-		return serialisedRawFile(decodedRawFile);
+	decode: (rawFile: Uint8Array) => {
+		const imageProcessor = new raw_editor.ImageProcessor(rawFile);
+		currentImageProcessor = imageProcessor;
+		const rgba = imageProcessor.apply_operations();
+		currentRGBA.set(rgba);
+		return rgba;
+		// return serialisedImageData(decodedRawFile);
 	},
-	subscribeToRawFile: (callback: (rgba: SerialisedRawFile) => void) => {
-		currentRawFileInstance.subscribe((rawFile) => {
-			if (rawFile) {
-				callback(serialisedRawFile(rawFile));
+	subscribeToRGBA: (callback: (rgba: SerialisedImageData) => void) => {
+		currentRGBA.subscribe((rgba) => {
+			if (currentImageProcessor && rgba) {
+				const imageData = serialisedImageData(currentImageProcessor, rgba);
+				callback(imageData);
 			}
 		});
+	},
+	setExposure: (value: number) => {
+		if (currentImageProcessor) {
+			currentImageProcessor.set_exposure(value);
+			const rgba = currentImageProcessor.apply_operations();
+			console.log(rgba);
+			currentRGBA.set(rgba);
+		}
 	}
 };
-
-export type RawProcessorWorker = typeof rawProcessorWorker;
+export type RawProcessorWorker = Comlink.Remote<typeof rawProcessorWorker>;
 Comlink.expose(rawProcessorWorker);

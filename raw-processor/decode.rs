@@ -8,9 +8,6 @@ use rawler::{
 };
 use wasm_bindgen::prelude::*;
 
-// TODO: rename to accurate describe that this decodes, and instantiates a MyRawImage. But also in the future will process existing edits.
-// TODO: figure out if we can make this more performant, and enable reprocessing per edit
-// TODO: make this a promise/ future, and use the crate for binding those together
 pub fn decode_raw_image(data: &[u8]) -> Result<(RawMetadata, DynamicImage), JsValue> {
     let buf = Buffer::from(data.to_vec());
     let mut rawfile = RawFile::from(buf);

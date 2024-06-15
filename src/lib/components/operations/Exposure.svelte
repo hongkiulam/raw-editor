@@ -1,20 +1,23 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { throttle } from 'lodash-es';
 	import Slider from './ui/Slider.svelte';
-	import { useRawImage } from '../../state/useRawImage';
+	import { rawProcessorWorker } from '../../workers';
 
-	const { updateEdits, edits } = useRawImage();
 	let value = 0;
 
-	const onChange = (value: number) => {
-		updateEdits('exposure', value);
+	const onChange = async (value: number) => {
+		// updateEdits('exposure', value);
+		console.log('setting exposure', value);
+		// TODO: i think i should store rgb state main thread side, as its useful to know
+		// in cases like this where we dont run this function when it doesnt exist
+		await rawProcessorWorker.setExposure(value);
 	};
 
-	$: {
-		onChange(value);
-	}
+	const throttledOnChange = throttle(onChange, 500);
 
-	$: console.log($edits?.exposure);
+	$: {
+		throttledOnChange(value);
+	}
 </script>
 
 <Slider bind:value base={0} min={-1} max={1} step={0.01} label="Exposure" />
