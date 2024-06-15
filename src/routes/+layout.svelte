@@ -4,10 +4,7 @@
 	const { children } = $props();
 
 	const initialiseWasm = async () => {
-		const mess = await rawProcessorWorker.init();
-		console.log(mess);
-		// await init();
-		// await initThreadPool(navigator.hardwareConcurrency);
+		await rawProcessorWorker.init();
 	};
 	const isomorphicInitWasm = !browser ? new Promise(() => {}) : initialiseWasm();
 </script>

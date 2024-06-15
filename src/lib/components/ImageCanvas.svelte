@@ -1,23 +1,28 @@
 <script lang="ts">
-	import { useRawImage } from '$lib/state/useRawImage';
+	import * as Comlink from 'comlink';
 	import { useCanvas } from '$lib/state/canvas';
-	import type { RawFile } from '$lib/raw-processor/raw_processor';
-	const { rawFile, editedImageRGBA } = useRawImage();
+	import { rawProcessorWorker } from '../workers';
+	import type { SerialisedRawFile } from '../workers/raw-processor';
 	const canvasState = useCanvas();
 
 	// todo, disable system viewport zooming for the canvas area
 	// todo: retain image quality by handling zoom and position in the canvas using the drawImage arguments (on the scaled canvas)
 	const canvasLogger = (...args: any[]) => console.log('%c CANVAS', 'color: yellow', ...args);
 
+	let rawFile = $state<SerialisedRawFile>();
 	$effect(() => {
-		console.log('rawImage', $rawFile);
+		const callback = (newRawFile: SerialisedRawFile) => {
+			console.log('Got new raw file from worker');
+			rawFile = newRawFile;
+		};
+		rawProcessorWorker.subscribeToRawFile(Comlink.proxy(callback));
 	});
 
 	let imageBoundingArea = $state({ width: 0, height: 0 });
 
 	// TODO: Improve performing, by reducing amount of copies, by drawing to the image source canvas direct from rust, then emit and event to redraw other canvas.
 	let imageSource: HTMLCanvasElement | undefined = $state();
-	const drawImageSource = (rawFile: RawFile, editedImageRGBA: Uint8Array) => {
+	const drawImageSource = (rawFile: SerialisedRawFile, editedImageRGBA: Uint8Array) => {
 		canvasLogger('Redrawing image source');
 		const canvas = document.createElement('canvas');
 		// Set the image source to be the size as the raw image
@@ -37,8 +42,8 @@
 	};
 	$effect(() => {
 		// Any time the raw image changes (the file has changed), or the image mutates (same file, but operated on)
-		if ($editedImageRGBA && $rawFile) {
-			return drawImageSource($rawFile, $editedImageRGBA);
+		if (rawFile) {
+			return drawImageSource(rawFile, rawFile.image_as_rgba8);
 		}
 	});
 
