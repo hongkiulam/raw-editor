@@ -2,6 +2,7 @@
 	import { createSlider, melt, type CreateSliderProps } from '@melt-ui/svelte';
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
+	import { doubleTap } from '../../../helpers/dblTapAction';
 
 	export let base: number;
 	export let min: number;
@@ -102,7 +103,13 @@
 	$: activeThumb = getSingleValueFromRange($meltValueStore) > base ? 'higher' : 'lower';
 </script>
 
-<span use:melt={$root} class="root">
+<span
+	use:melt={$root}
+	class="root"
+	use:doubleTap={() => {
+		meltValueStore.set(getRangeFromSingleValue(0));
+	}}
+>
 	<span class="value">{getSingleValueFromRange($meltValueStore)}</span>
 	<span class="label">{label}</span>
 	<span class="range-track">
