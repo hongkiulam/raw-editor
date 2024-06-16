@@ -1,24 +1,14 @@
 <script lang="ts">
-	import { throttle } from 'lodash-es';
 	import Slider from './ui/Slider.svelte';
 	import { rawProcessorWorker } from '../../workers';
 	import { currentImageData } from '../../state/currentImageData';
-	import { imageOperationsByFilename } from '../../state/imageOperations';
+	import { createSyncedOperationControlState } from '../../state/createSyncedControlState.svelte';
 
-	let value = imageOperationsByFilename.getOperationValue('exposure');
-
-	const onChange = async (value: number) => {
+	let value = createSyncedOperationControlState('exposure', async (value) => {
 		if ($currentImageData.fileName) {
 			await rawProcessorWorker.setExposure(value);
 		}
-	};
-
-	const throttledOnChange = throttle(onChange, 500);
-
-	$: {
-		throttledOnChange(value);
-		imageOperationsByFilename.setOperationValue('exposure', value);
-	}
+	});
 </script>
 
-<Slider bind:value base={0} min={-1} max={1} step={0.01} label="Exposure" />
+<Slider bind:value={$value} base={0} min={-1} max={1} step={0.01} label="Exposure" />
