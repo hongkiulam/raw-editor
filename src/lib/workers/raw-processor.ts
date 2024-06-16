@@ -54,11 +54,21 @@ const rawProcessorWorker = {
 		if (operations.exposure !== 0) {
 			imageProcessor.set_exposure(operations.exposure);
 		}
+		console.log('rotation', operations.rotation);
+		if (operations.rotation !== 0) {
+			imageProcessor.set_rotation(operations.rotation);
+		}
 		applyOperations();
 	},
 	setExposure: (value: number) => {
 		if (currentImageProcessor) {
 			currentImageProcessor.set_exposure(value);
+			applyOperations();
+		}
+	},
+	setRotation: (angle: number) => {
+		if (currentImageProcessor) {
+			currentImageProcessor.set_rotation(angle);
 			applyOperations();
 		}
 	},

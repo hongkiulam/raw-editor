@@ -10,12 +10,17 @@ export const createSyncedOperationControlState = <
 	onChange: (value: Value) => void,
 	throttleTime = 500
 ) => {
-	let value = writable(imageOperationsByFilename.getOperationValue(key) as Value);
+	let hasChanged = false;
+	let originalValue = imageOperationsByFilename.getOperationValue(key) as Value;
+	let value = writable(originalValue);
 
 	const throttledOnChange = throttle(onChange, throttleTime);
 
 	value.subscribe((value) => {
+		if (!hasChanged && originalValue === value) return;
+		// this ensures that we only call the onChange function when the value has changed
 		throttledOnChange(value);
+		hasChanged = true;
 		imageOperationsByFilename.setOperationValue(key, value);
 	});
 

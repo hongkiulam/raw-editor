@@ -15,10 +15,12 @@ const RGB_MAX_16BIT: u16 = 65535;
 // directly interfaced with JS. (return types, function arguments, etc.)
 #[wasm_bindgen]
 pub struct ImageProcessor {
-    image_width: u32,
-    image_height: u32,
     metadata: RawMetadata,
-    image: DynamicImage,
+    original_image: DynamicImage,
+    original_width: u32,
+    original_height: u32,
+    edited_width: u32,
+    edited_height: u32,
     // Stores the operations to be applied to the image
     // Each operation is a tuple of the operation type and the operation function
     // Storing the operation type allows us to ensure that an operation is only applied once (see apply_operations method)
@@ -34,10 +36,12 @@ impl ImageProcessor {
         let (metadata, dynamic_image) = decoded_image;
 
         ImageProcessor {
-            image_width: dynamic_image.width(),
-            image_height: dynamic_image.height(),
             metadata,
-            image: dynamic_image,
+            original_height: dynamic_image.height(),
+            original_width: dynamic_image.width(),
+            edited_height: dynamic_image.height(),
+            edited_width: dynamic_image.width(),
+            original_image: dynamic_image.clone(),
             operations: Vec::new(),
         }
     }
@@ -45,12 +49,22 @@ impl ImageProcessor {
     // #[wasm_bindgen(getter)] - this allows us to expose this function to JS as a getter i.e. `myRawImage.width` 👍 `myRawImage.width()` 🙅
     #[wasm_bindgen(getter)]
     pub fn width(&self) -> u32 {
-        self.image_width
+        self.edited_width
     }
 
     #[wasm_bindgen(getter)]
     pub fn height(&self) -> u32 {
-        self.image_height
+        self.edited_height
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn original_width(&self) -> u32 {
+        self.original_width
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn original_height(&self) -> u32 {
+        self.original_height
     }
 
     #[wasm_bindgen(getter)]
@@ -62,34 +76,20 @@ impl ImageProcessor {
         // create a HashSet to store the operation types that have been applied
         // this allows us to ensure that an operation is only applied once, by ignoring operations with the same type
         let mut applied_operations = HashSet::new();
-        let mut image = self.image.clone();
+        let mut edited_image = self.original_image.clone();
 
         // iterate over the operations in reverse order (most recent operation first)
         for (operation_type, operation) in self.operations.iter().rev() {
             if !applied_operations.contains(operation_type) {
-                operation(&mut image);
+                operation(&mut edited_image);
                 applied_operations.insert(operation_type);
             }
         }
 
-        image.into_rgba8().to_vec()
+        self.edited_width = edited_image.width();
+        self.edited_height = edited_image.height();
+        edited_image.into_rgba8().to_vec()
     }
-
-    // TODO: something like this, but we also need to include the values
-    // TODO: this should potentially be offloaded to another module
-    // pub fn get_operations(&self) -> Result<JsValue, JsValue> {
-    //     let operation_types: Vec<String> = self
-    //         .operations
-    //         .iter()
-    //         .map(|(operation_type, _)| match operation_type {
-    //             OperationType::Exposure => "Exposure".to_string(),
-    //             OperationType::WhiteBalance => "WhiteBalance".to_string(),
-    //             // Add other operation types here...
-    //         })
-    //         .collect();
-
-    //     Ok(serde_wasm_bindgen::to_value(&operation_types)?)
-    // }
 
     pub fn set_exposure(&mut self, value: f32) {
         self.operations.push((
@@ -114,13 +114,17 @@ impl ImageProcessor {
         ));
     }
 
-    // pub fn add_rotation(&mut self, angle: f32) {
-    //     self.operations
-    //         .push(Box::new(move |image: &mut DynamicImage| {
-    //             let new_image = image.rotate(angle); // Assuming rotate method is available in rawler
-    //             *image = new_image;
-    //         }));
-    // }
+    pub fn set_rotation(&mut self, angle: f32) {
+        self.operations.push((
+            OperationType::Rotation,
+            Box::new(move |image: &mut DynamicImage| match angle {
+                90.0 => *image = image.rotate90(),
+                180.0 => *image = image.rotate180(),
+                270.0 => *image = image.rotate270(),
+                _ => (),
+            }),
+        ));
+    }
 
     // pub fn add_white_balance(&mut self, value: f32) {
     //     self.operations

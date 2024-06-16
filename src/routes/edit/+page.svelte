@@ -3,6 +3,7 @@
 	import ImageCanvas from '$lib/components/editor/ImageCanvas.svelte';
 	import Exposure from '$lib/components/operations/Exposure.svelte';
 	import Toolbar from '../../lib/components/editor/Toolbar.svelte';
+	import Rotation from '../../lib/components/operations/Rotation.svelte';
 	import { currentImageData } from '../../lib/state/currentImageData';
 
 	$effect(() => {
@@ -22,6 +23,7 @@
 		</main>
 		<aside class="translucent-glass">
 			<Exposure />
+			<Rotation />
 		</aside>
 	</div>
 {/if}

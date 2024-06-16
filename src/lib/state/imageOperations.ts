@@ -3,10 +3,12 @@ import { currentImageData } from './currentImageData';
 
 export interface Operations {
 	exposure: number;
+	rotation: number;
 }
 
 const defaultOperations: Operations = {
-	exposure: 0
+	exposure: 0,
+	rotation: 0
 };
 
 const isomorphicLocalStorage =
@@ -39,7 +41,7 @@ const createImageOperationsStore = () => {
 			});
 			return defaultOperations;
 		}
-		return existingOperations;
+		return { ...defaultOperations, ...existingOperations }; // 👈 This ensures that if new operations are added, they are backfilled to existing cache
 	};
 
 	/**
