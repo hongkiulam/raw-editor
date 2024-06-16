@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { canvasState } from '../state/canvas';
-	import { currentImageData } from '../state/currentImageData';
-	import type { SerialisedImageData } from '../workers/raw-processor';
+	import { canvasState } from '../../state/canvas';
+	import { currentImageData } from '../../state/currentImageData';
+	import type { SerialisedImageData } from '../../workers/raw-processor';
 
 	// todo, disable system viewport zooming for the canvas area
 	// todo: retain image quality by handling zoom and position in the canvas using the drawImage arguments (on the scaled canvas)

@@ -1,6 +1,6 @@
 <script>
 	import { goto } from '$app/navigation';
-	import ImageCanvas from '$lib/components/ImageCanvas.svelte';
+	import ImageCanvas from '$lib/components/editor/ImageCanvas.svelte';
 	import Exposure from '$lib/components/operations/Exposure.svelte';
 	import { currentImageData } from '../../lib/state/currentImageData';
 
