@@ -11,4 +11,4 @@
 	});
 </script>
 
-<Slider bind:value={$value} base={0} min={-2} max={2} step={0.01} label="Exposure" />
+<Slider bind:value={$value} base={0} min={-1} max={1} step={0.01} label="Exposure" />

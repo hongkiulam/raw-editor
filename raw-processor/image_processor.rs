@@ -100,15 +100,15 @@ impl ImageProcessor {
                     .unwrap()
                     .pixels_mut()
                     .for_each(|pixel| {
-                        pixel[0] = (pixel[0] as f32 * (1.0 + value))
-                            .clamp(0.0, RGB_MAX_16BIT as f32)
-                            as u16;
-                        pixel[1] = (pixel[1] as f32 * (1.0 + value))
-                            .clamp(0.0, RGB_MAX_16BIT as f32)
-                            as u16;
-                        pixel[2] = (pixel[2] as f32 * (1.0 + value))
-                            .clamp(0.0, RGB_MAX_16BIT as f32)
-                            as u16;
+                        let multiplier = value * 2.0; // we want to scale the multiple by 2, so that the max/min values of 1/-1 are 2/-2. We could do this client-side, but I've chosen to couple it here.
+                        let adjust_exposure_for_pixel = |pixel: &mut u16| {
+                            *pixel = (*pixel as f32 * (1.0 + multiplier))
+                                .clamp(0.0, RGB_MAX_16BIT as f32)
+                                as u16;
+                        };
+                        adjust_exposure_for_pixel(&mut pixel[0]);
+                        adjust_exposure_for_pixel(&mut pixel[1]);
+                        adjust_exposure_for_pixel(&mut pixel[2]);
                     });
             }),
         ));
