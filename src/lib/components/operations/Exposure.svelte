@@ -2,21 +2,22 @@
 	import { throttle } from 'lodash-es';
 	import Slider from './ui/Slider.svelte';
 	import { rawProcessorWorker } from '../../workers';
+	import { currentImageData } from '../../state/currentImageData';
+	import { imageOperationsByFilename } from '../../state/imageOperations';
 
-	let value = 0;
+	let value = imageOperationsByFilename.getOperationValue('exposure');
 
 	const onChange = async (value: number) => {
-		// updateEdits('exposure', value);
-		console.log('setting exposure', value);
-		// TODO: i think i should store rgb state main thread side, as its useful to know
-		// in cases like this where we dont run this function when it doesnt exist
-		await rawProcessorWorker.setExposure(value);
+		if ($currentImageData.fileName) {
+			await rawProcessorWorker.setExposure(value);
+		}
 	};
 
 	const throttledOnChange = throttle(onChange, 500);
 
 	$: {
 		throttledOnChange(value);
+		imageOperationsByFilename.setOperationValue('exposure', value);
 	}
 </script>
 

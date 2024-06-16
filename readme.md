@@ -1,7 +1,6 @@
 ### todo
 
 - storing edits either JS side or Rust side, and allow for reconciliation
-- excalidraw system diagram
 - loading states
 
 # 🚧 Raw Editor

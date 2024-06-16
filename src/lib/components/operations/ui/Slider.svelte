@@ -39,6 +39,7 @@
 	// it provides us the correct elements to style the slider in the way we want (highlighted mid section)
 	let meltValueStore = writable(getRangeFromSingleValue(value));
 
+	// 👇 This sends the latest value back to the implementor, allowing stuff like bind:value
 	onMount(() => {
 		meltValueStore.subscribe((v) => {
 			value = getSingleValueFromRange(v);

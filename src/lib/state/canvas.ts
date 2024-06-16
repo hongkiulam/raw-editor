@@ -20,11 +20,11 @@ const initialInteractionState: Omit<CanvasState, ''> = {
 	pinchDistance: undefined
 };
 
-const canvasState = writable<CanvasState>({
-	...initialInteractionState
-});
+const createCanvasStore = () => {
+	const canvasState = writable<CanvasState>({
+		...initialInteractionState
+	});
 
-export const useCanvas = () => {
 	const readonlyCanvasState = derived(canvasState, (v) => v);
 
 	const handleZoomUpdate = (
@@ -158,3 +158,5 @@ export const useCanvas = () => {
 		}
 	};
 };
+
+export const canvasState = createCanvasStore();

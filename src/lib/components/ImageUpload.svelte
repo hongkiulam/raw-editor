@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { rawProcessorWorker } from '../workers';
+	import { goto } from '$app/navigation';
+	import { currentImageData } from '../state/currentImageData';
 </script>
 
 <input
@@ -11,7 +12,8 @@
 		const fileName = file.name;
 		const arrayBuffer = await file.arrayBuffer();
 		const uint8Array = new Uint8Array(arrayBuffer);
-		await rawProcessorWorker.decode(uint8Array);
+		await currentImageData.setNewFile(fileName, uint8Array);
+		goto('/edit');
 	}}
 />
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { currentImageData } from '../lib/state/currentImageData';
 	import { rawProcessorWorker } from '../lib/workers';
 	const { children } = $props();
 
@@ -9,6 +10,14 @@
 	const isomorphicInitWasm = !browser ? new Promise(() => {}) : initialiseWasm();
 </script>
 
+<nav style="z-index:99; position:fixed;bottom:0;">
+	<button
+		onclick={(e) => {
+			e.preventDefault();
+			currentImageData.reset();
+		}}>home</button
+	>
+</nav>
 <!-- TODO: move this to +page so we show the loading state inside of the UI layout -->
 {#await isomorphicInitWasm}
 	<p>loading...</p>

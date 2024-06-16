@@ -1,49 +1,39 @@
 <script lang="ts">
-	import * as Comlink from 'comlink';
-	import { useCanvas } from '$lib/state/canvas';
-	import { rawProcessorWorker } from '../workers';
+	import { canvasState } from '../state/canvas';
+	import { currentImageData } from '../state/currentImageData';
 	import type { SerialisedImageData } from '../workers/raw-processor';
-	const canvasState = useCanvas();
 
 	// todo, disable system viewport zooming for the canvas area
 	// todo: retain image quality by handling zoom and position in the canvas using the drawImage arguments (on the scaled canvas)
 	const canvasLogger = (...args: any[]) => console.log('%c CANVAS', 'color: yellow', ...args);
 
-	let rawFile = $state<SerialisedImageData>();
-	$effect(() => {
-		const callback = (newRawFile: SerialisedImageData) => {
-			console.log('Got new raw file from worker');
-			rawFile = newRawFile;
-		};
-		rawProcessorWorker.subscribeToRGBA(Comlink.proxy(callback));
-	});
-
 	let imageBoundingArea = $state({ width: 0, height: 0 });
 
 	// TODO: Improve performing, by reducing amount of copies, by drawing to the image source canvas direct from rust, then emit and event to redraw other canvas.
 	let imageSource: HTMLCanvasElement | undefined = $state();
-	const drawImageSource = (rawFile: SerialisedImageData, editedImageRGBA: Uint8Array) => {
+	const drawImageSource = (data: SerialisedImageData, editedImageRGBA: Uint8Array) => {
 		canvasLogger('Redrawing image source');
 		const canvas = document.createElement('canvas');
 		// Set the image source to be the size as the raw image
-		canvas.width = rawFile.width;
-		canvas.height = rawFile.height;
+		canvas.width = data.width;
+		canvas.height = data.height;
 
 		const ctx = canvas.getContext('2d');
 		if (!ctx) {
 			throw new Error('Could not get context');
 		}
-		const imageData = ctx.createImageData(rawFile.width, rawFile.height);
+		const imageData = ctx.createImageData(data.width, data.height);
 		// this is not using state atm, so beware of diverging data (shouldnt tho)
 		imageData.data.set(editedImageRGBA);
 		ctx.reset();
 		ctx.putImageData(imageData, 0, 0);
 		imageSource = canvas;
 	};
+
 	$effect(() => {
 		// Any time the raw image changes (the file has changed), or the image mutates (same file, but operated on)
-		if (rawFile) {
-			return drawImageSource(rawFile, rawFile.image_as_rgba8);
+		if ($currentImageData.image) {
+			return drawImageSource($currentImageData.image, $currentImageData.image.image_as_rgba8);
 		}
 	});
 
