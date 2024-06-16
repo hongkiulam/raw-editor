@@ -77,7 +77,8 @@
 			// since we already scaled and positioned with imageCanvas, we can just render to 0,0
 			ctx.translate($canvasState.originX, $canvasState.originY);
 			ctx.scale($canvasState.zoom, $canvasState.zoom);
-			ctx.drawImage(scaledImageSource, 0, 0);
+			const toolbarHeight = 56;
+			ctx.drawImage(scaledImageSource, 0, toolbarHeight);
 		}
 	});
 

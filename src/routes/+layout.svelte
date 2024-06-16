@@ -10,14 +10,6 @@
 	const isomorphicInitWasm = !browser ? new Promise(() => {}) : initialiseWasm();
 </script>
 
-<nav style="z-index:99; position:fixed;bottom:0;">
-	<button
-		onclick={(e) => {
-			e.preventDefault();
-			currentImageData.reset();
-		}}>home</button
-	>
-</nav>
 <!-- TODO: move this to +page so we show the loading state inside of the UI layout -->
 {#await isomorphicInitWasm}
 	<p>loading...</p>
@@ -42,13 +34,20 @@
 		box-sizing: border-box;
 		margin: 0;
 		padding: 0;
-		outline: 1px solid rgba(0, 0, 0, 0.1);
+		/* outline: 1px solid rgba(0, 0, 0, 0.1); */
 	}
 	:global(:root) {
 		--bg-rgb: 255, 255, 255;
 		--z-base: 0;
 		--z-above: 1;
+		--z-toolbar: calc(var(--z-above) + var(--z-controls));
 		--z-controls: calc(var(--z-above) + var(--z-canvas));
 		--z-canvas: calc(var(--z-above) + var(--z-base));
+		--space-0: 2px;
+		--space-1: 4px;
+		--space-2: 8px;
+		--space-3: 16px;
+		--space-4: 24px;
+		--space-5: 32px;
 	}
 </style>
