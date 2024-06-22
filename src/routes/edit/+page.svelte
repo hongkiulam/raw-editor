@@ -41,9 +41,10 @@
 		left: 0;
 		width: 100%;
 		height: var(--toolbar-height);
-		background-color: rgba(var(--bg-rgb), 0.4);
+		background-color: hsl(var(--surface-2-hsl) / 40%);
 		z-index: var(--z-toolbar);
-		border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+		/* TODO */
+		border-bottom: 2px solid rgba(0, 0, 0);
 	}
 	aside {
 		position: absolute;
@@ -52,8 +53,9 @@
 		width: var(--sidebar-width);
 		height: 100%;
 		margin-top: var(--toolbar-height);
-		border-left: 1px solid rgba(0, 0, 0, 0.2);
-		background-color: rgba(var(--bg-rgb), 0.2);
+		background-color: hsl(var(--surface-1-hsl) / 20%);
+		/* TODO */
+		border-left: 2px solid rgba(0, 0, 0);
 		z-index: var(--z-controls);
 	}
 	main {

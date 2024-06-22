@@ -1,14 +1,22 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { currentImageData } from '../state/currentImageData';
+	import Button from './Button.svelte';
 	let loading = $state(false);
+	let inputElement: HTMLInputElement | null = null;
 </script>
 
-<label class:disabled={loading}>
-	<span>
+<label>
+	<Button
+		disabled={loading}
+		onclick={() => {
+			inputElement?.click();
+		}}
+	>
 		Upload an image {loading ? '...' : ''}
-	</span>
+	</Button>
 	<input
+		bind:this={inputElement}
 		type="file"
 		accept=".raw,.nef,.cr2,.arw,.dng"
 		onchange={async (e) => {
@@ -33,14 +41,6 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-	}
-	span {
-		cursor: pointer;
-		display: inline-block;
-		padding: var(--space-2) var(--space-3);
-		border: 1px solid #000;
-		border-radius: 4px;
-		background-color: #f0f0f0;
 	}
 	label.disabled {
 		pointer-events: none;

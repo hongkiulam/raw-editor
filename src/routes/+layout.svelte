@@ -20,34 +20,5 @@
 {/await}
 
 <style>
-	:global(body) {
-		width: 100%;
-		height: 100vh;
-		font-family: 'Roboto', sans-serif;
-		background: rgb(var(--bg-rgb));
-		background-image: radial-gradient(black 1px, transparent 0);
-		background-size: 40px 40px;
-		background-position: -19px -19px;
-		overflow: hidden;
-	}
-	:global(*) {
-		box-sizing: border-box;
-		margin: 0;
-		padding: 0;
-		/* outline: 1px solid rgba(0, 0, 0, 0.1); */
-	}
-	:global(:root) {
-		--bg-rgb: 255, 255, 255;
-		--z-base: 0;
-		--z-above: 1;
-		--z-toolbar: calc(var(--z-above) + var(--z-controls));
-		--z-controls: calc(var(--z-above) + var(--z-canvas));
-		--z-canvas: calc(var(--z-above) + var(--z-base));
-		--space-0: 2px;
-		--space-1: 4px;
-		--space-2: 8px;
-		--space-3: 16px;
-		--space-4: 24px;
-		--space-5: 32px;
-	}
+	@import '../app.css';
 </style>
