@@ -4,6 +4,7 @@
 	import { writable } from 'svelte/store';
 	import { doubleTap } from '../../../helpers/dblTapAction';
 
+	// TODO Convert this back to single number slider but implement the range block ourselves
 	export let base: number;
 	export let min: number;
 	export let max: number;
@@ -11,72 +12,30 @@
 	export let step = 0.01;
 	export let label: string;
 
-	/** ℹ️ This function converts the range value to a single value
-	 * e.g. if the range is [base, value], it will return value
-	 * if the range is [value, base], it will return value
-	 * if the range is [base, base], it will return base
-	 */
-	const getSingleValueFromRange = (value: number[]) => {
-		const withBaseRemoved = value.filter((v) => v !== base);
-		return withBaseRemoved[0] ?? base;
-	};
-
-	/** Converts a single value into a range, that is appropriate for the slider
-	 * e.g. if the value is greater than the base, the range will be [base, value]
-	 * if the value is less than the base, the range will be [value, base]
-	 */
-	const getRangeFromSingleValue = (value: number) => {
-		const range = [base, base];
-		if (value > base) {
-			range[1] = value;
-		} else {
-			range[0] = value;
-		}
-		return range;
-	};
-
 	// Out custom store to provide to the Melt UI Slider
 	// ℹ️ Provide two values to activate the range Slider, while we are not using the range functionality,
 	// it provides us the correct elements to style the slider in the way we want (highlighted mid section)
-	let meltValueStore = writable(getRangeFromSingleValue(value));
+	let meltValueStore = writable([value]);
 
 	// 👇 This sends the latest value back to the implementor, allowing stuff like bind:value
 	onMount(() => {
 		meltValueStore.subscribe((v) => {
-			value = getSingleValueFromRange(v);
+			value = v[0];
 		});
 	});
 
 	let isStickingToBase = false;
 	const maxStickDistance = 5 * step;
 
-	// This ensures that whenever the range changes, we eagerly accept the changes value, and set the opposing value to the base
-	// e.g. The current range is [-0.5,0], assuming 0 is the base value
-	// The new range is [-1,0], the first value changed, so the last value is set to zero (in this case its zero anyway)
-	// The new range is [-0.5, 0.5], the second value changed, so the first value is set to zero -> [0, 0.5]
-	const ensureBaseOnChange = (current: number[], next: number[]) => {
-		// find which index changed
-		const changedIndex = next.findIndex((v, i) => v !== current[i]);
-		if (changedIndex === -1) return next;
-		const newValues = [...next];
-		// set the other index to the base
-		newValues[1 - changedIndex] = base;
-		return newValues;
-	};
-
-	// known bug where the mouse movement registers value changes when stuck on 0 for very small movements. this causes the final position which it reaches 0.05 to be actually 0.02
-	// 👆 but too small to matter
 	const onValueChange: CreateSliderProps['onValueChange'] = ({ curr, next }) => {
-		const nextWithBase = ensureBaseOnChange(curr, next);
-		const nextValue = getSingleValueFromRange(nextWithBase);
-
+		const nextValue = next[0];
 		if (isStickingToBase) {
 			const upperBound = base + maxStickDistance;
 			const lowerBound = base - maxStickDistance;
 
 			if (nextValue <= lowerBound || nextValue >= upperBound) {
 				isStickingToBase = false;
-				return nextWithBase;
+				return next;
 			} else {
 				// We are still sticking to the base, so we should return the current value
 				return curr;
@@ -87,7 +46,21 @@
 			isStickingToBase = true;
 		}
 
-		return nextWithBase;
+		return next;
+	};
+
+	const getRangeHighlightStyle = () => {
+		const value = $meltValueStore[0];
+		const baseDistanceFromLeft = ((base - min) / (max - min)) * 100;
+		const currentDistanceFromLeft = ((value - min) / (max - min)) * 100;
+
+		let style = 'position:absolute;';
+		if (currentDistanceFromLeft > baseDistanceFromLeft) {
+			style += `left: ${baseDistanceFromLeft}%; right: ${100 - currentDistanceFromLeft}%;`;
+		} else {
+			style += `left: ${currentDistanceFromLeft}%; right: ${100 - baseDistanceFromLeft}%;`;
+		}
+		return style;
 	};
 
 	const {
@@ -100,28 +73,33 @@
 		onValueChange
 	});
 
-	$: activeThumb = getSingleValueFromRange($meltValueStore) > base ? 'higher' : 'lower';
+	let doubleTapTransitionToBase = false;
 </script>
 
 <span
 	use:melt={$root}
 	class="root"
+	class:double-tap-transition={doubleTapTransitionToBase}
 	use:doubleTap={() => {
-		meltValueStore.set(getRangeFromSingleValue(0));
+		doubleTapTransitionToBase = true;
+		setTimeout(() => {
+			doubleTapTransitionToBase = false;
+		}, 300); // animation time
+		meltValueStore.set([base]);
 	}}
 >
 	<div class="field-info">
 		<span>{label}</span>
-		<span>{getSingleValueFromRange($meltValueStore)}</span>
+		<span>{$meltValueStore[0]}</span>
 	</div>
 	<div class="ruler minor"></div>
 	<div class="ruler major"></div>
 	<span class="range-track">
-		<span use:melt={$range} class="range"></span>
+		<!-- Override the range styling, so that we can have it grow from the base value -->
+		<span use:melt={$range} class="range" style={getRangeHighlightStyle()}></span>
 	</span>
 
-	<span use:melt={$thumbs[0]} class="thumb lower" class:active={activeThumb === 'lower'}></span>
-	<span use:melt={$thumbs[1]} class="thumb higher" class:active={activeThumb === 'higher'}></span>
+	<span use:melt={$thumbs[0]} class="thumb"></span>
 </span>
 
 <style>
@@ -138,6 +116,7 @@
 		font-size: var(--font-size-0);
 		color: var(--text-1);
 		border-radius: var(--radius-1);
+		overflow: hidden;
 	}
 
 	.field-info {
@@ -218,13 +197,17 @@
 		height: 100%;
 		width: var(--border-size-2);
 		transition: background-color 0.3s ease;
-	}
-	/* by default, the thumb should be the same colour as the range, but also this provides a visual element when the thumb is in the middle */
-	.thumb.active {
+		/* by default, the thumb should be the same colour as the range, but also this provides a visual element when the thumb is in the middle */
 		background-color: var(--surface-4);
 	}
+	.root.double-tap-transition {
+		.thumb,
+		.range {
+			transition: all 0.3s ease;
+		}
+	}
 
-	.root:hover .thumb.active,
+	.root:hover .thumb,
 	.thumb:focus {
 		background-color: var(--brand);
 	}
