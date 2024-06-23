@@ -33,7 +33,8 @@ const createCanvasStore = () => {
 		zoomOriginY: number
 	) => {
 		canvasState.update((state) => {
-			const wheel = zoomDirection === 'IN' ? 1.1 : 0.9;
+			const zoomSensitivity = 0.01; // 0.01 works better for mac trackpad
+			const wheel = zoomDirection === 'IN' ? 1 + zoomSensitivity : 1 - zoomSensitivity;
 
 			const newZoom = state.zoom * wheel;
 

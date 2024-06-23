@@ -110,8 +110,12 @@
 		meltValueStore.set(getRangeFromSingleValue(0));
 	}}
 >
-	<span class="value">{getSingleValueFromRange($meltValueStore)}</span>
-	<span class="label">{label}</span>
+	<div class="field-info">
+		<span>{label}</span>
+		<span>{getSingleValueFromRange($meltValueStore)}</span>
+	</div>
+	<div class="ruler minor"></div>
+	<div class="ruler major"></div>
 	<span class="range-track">
 		<span use:melt={$range} class="range"></span>
 	</span>
@@ -128,44 +132,100 @@
 		width: 200px;
 		align-items: center;
 		isolation: isolate;
+		/* colour is ligher than the sidebar */
+		background: hsl(var(--surface-4-hsl) / 50%);
+		/* font size for all nested elements should be small */
+		font-size: var(--font-size-0);
+		color: var(--text-1);
+		border-radius: var(--radius-1);
 	}
 
-	.label {
+	.field-info {
 		position: absolute;
 		top: 0;
 		left: 0;
-		/* // todo, do proper tokenify */
-		font-size: small;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		height: 100%;
+		padding: var(--size-1);
 		z-index: 1;
 	}
-	.value {
+
+	.ruler {
+		--rule-width: 1px;
 		position: absolute;
 		top: 0;
-		right: 0;
-		/* // todo, do proper tokenify */
-		font-size: small;
-		z-index: 1;
+		/* Shift to the right by 0.5px so that the 1px lines have their centre points exactly on the division lines */
+		left: calc(var(--rule-width) / 2);
+		/* make this 1px smaller so that we clip on the right hand side, otherwise it would stick out */
+		width: calc(100% - var(--rule-width));
+		height: 100%;
+
+		/* some magic gradient, it renders a some spacing on the left, then a single rule on the right */
+		/* This is all based on the css variables provided for spacing, width and height */
+		/* Then we use a background repeat to repeat it along the enture width */
+		background-image: linear-gradient(
+			to right,
+			transparent 0px,
+			transparent calc(var(--rule-spacing) - var(--rule-width)),
+			var(--rule-color) calc(var(--rule-spacing) - var(--rule-width)),
+			var(--rule-color) var(--rule-spacing)
+		);
+		background-size: var(--rule-spacing) /* x */ var(--rule-height) /* y */;
+
+		background-repeat: repeat-x;
+		transition: opacity 0.3s ease;
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.root:hover .ruler {
+		opacity: 1;
+	}
+
+	.ruler.minor {
+		/* one line every 5 pixels for the 200px width, i.e. 40 lines */
+		--rule-height: 4px;
+		--rule-spacing: 5px;
+		--rule-color: hsl(var(--surface-4-hsl) / 50%);
+	}
+
+	.ruler.major {
+		--rule-height: 6px;
+		--rule-spacing: 40px;
+		--rule-color: hsl(var(--surface-4-hsl) / 100%);
 	}
 
 	.range-track {
 		height: 100%;
 		width: 100%;
-		background-color: rgba(0, 0, 0, 0.4);
 	}
 
 	.range {
 		height: 100%;
-		background-color: rgba(255, 255, 255, 0.7);
+		/* lighter colour */
+		background-color: var(--surface-4);
+		transition: background-color 0.3s ease;
+	}
+
+	.root:hover .range {
+		background-color: hsl(var(--brand-hsl) / 50%);
 	}
 
 	.thumb {
 		height: 100%;
-		width: 2px;
-		&:focus {
-		}
+		width: var(--border-size-2);
+		transition: background-color 0.3s ease;
+	}
+	/* by default, the thumb should be the same colour as the range, but also this provides a visual element when the thumb is in the middle */
+	.thumb.active {
+		background-color: var(--surface-4);
+	}
 
-		&.active {
-			background-color: rgba(0, 0, 255, 0.7);
-		}
+	.root:hover .thumb.active,
+	.thumb:focus {
+		background-color: var(--brand);
 	}
 </style>

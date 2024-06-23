@@ -41,10 +41,9 @@
 		left: 0;
 		width: 100%;
 		height: var(--toolbar-height);
-		background-color: hsl(var(--surface-2-hsl) / 40%);
+		background-color: hsl(var(--surface-1-hsl) / 80%);
 		z-index: var(--z-toolbar);
-		/* TODO */
-		border-bottom: 2px solid rgba(0, 0, 0);
+		border-bottom: var(--border-size-2) solid var(--surface-2);
 	}
 	aside {
 		position: absolute;
@@ -53,10 +52,14 @@
 		width: var(--sidebar-width);
 		height: 100%;
 		margin-top: var(--toolbar-height);
-		background-color: hsl(var(--surface-1-hsl) / 20%);
-		/* TODO */
-		border-left: 2px solid rgba(0, 0, 0);
+		background-color: hsl(var(--surface-1-hsl) / 80%);
+		border-left: var(--border-size-2) solid var(--surface-2);
 		z-index: var(--z-controls);
+		display: flex;
+		flex-direction: column;
+		gap: var(--size-1);
+		align-items: center;
+		padding: var(--size-1);
 	}
 	main {
 		display: grid;
