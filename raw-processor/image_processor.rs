@@ -1,6 +1,6 @@
 use image::DynamicImage;
 use rawler::decoders::RawMetadata;
-use std::collections::HashSet;
+use std::collections::{HashMap};
 use wasm_bindgen::prelude::*;
 
 use crate::decode;
@@ -24,6 +24,7 @@ pub struct ImageProcessor {
     // Stores the operations to be applied to the image
     // Each operation is a tuple of the operation type and the operation function
     // Storing the operation type allows us to ensure that an operation is only applied once (see apply_operations method)
+    // TODO: can potentially make this a HashMap, then we dedupe the operations up front
     operations: Vec<(OperationType, Box<dyn Fn(&mut DynamicImage)>)>,
 }
 
@@ -73,17 +74,30 @@ impl ImageProcessor {
     }
 
     pub fn apply_operations(&mut self) -> Vec<u8> {
-        // create a HashSet to store the operation types that have been applied
-        // this allows us to ensure that an operation is only applied once, by ignoring operations with the same type
-        let mut applied_operations = HashSet::new();
+        // create a HashMap to store the operations that need to be applied, deduped by operation type
+        let mut deduped_operations  = HashMap::new();
+
+        // iterate over the operations (oldest operation first)
+        // HashMap will automatically dedupe the operations by operation type, keeping the most recent value
+        // the end result of this loop is that we have a HashMap with the most recent operation for each operation type
+        for (operation_type, operation) in self.operations.iter() {
+            deduped_operations.insert(operation_type, operation);
+        }
+
         let mut edited_image = self.original_image.clone();
 
-        // iterate over the operations in reverse order (most recent operation first)
-        for (operation_type, operation) in self.operations.iter().rev() {
-            if !applied_operations.contains(operation_type) {
-                operation(&mut edited_image);
-                applied_operations.insert(operation_type);
-            }
+        // apply the operations in our desired order
+
+        // Basic Adjustments: White Balance, Exposure
+        if let Some(operation) = deduped_operations.get(&OperationType::Exposure) {
+            operation(&mut edited_image);
+        }
+
+        // Tone and Color: 
+
+        // Optics and Geometry: Rotation
+        if let Some(operation) = deduped_operations.get(&OperationType::Rotation) {
+            operation(&mut edited_image);
         }
 
         self.edited_width = edited_image.width();

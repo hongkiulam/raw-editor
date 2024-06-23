@@ -115,13 +115,6 @@ const createCanvasStore = () => {
 					centerX,
 					centerY
 				);
-				// const wheel = currentPinchDistance > lastDist ? 1.1 : 0.9;
-				// const newScale = scale * wheel;
-
-				// originX = centerX - ((centerX - originX) * newScale) / scale;
-				// originY = centerY - ((centerY - originY) * newScale) / scale;
-
-				// scale = newScale;
 			}
 			canvasState.update((state) => {
 				state.pinchDistance = currentPinchDistance;

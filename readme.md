@@ -115,6 +115,61 @@ This would be ideal, however, my attempts to implement this ran into some issues
 - Image processing is a CPU intensive task, if the functions are invoked on the main thread, it would pause all UI interactions for the duration of the invocation.
 - To mitigate this, the image prcessing code can be executed from a Web Worker
 
+## Implementing commutative operations
+
+> Commutative: involving the condition that a group of quantities connected by operators gives the same result whatever the order of the quantities involved, e.g. a × b = b × a
+
+A question that may arise when building an image editor, is how can we apply the same operations, regardless of order, and yield the same result. This is the behaviour in which the user will expect.
+
+e.g.
+
+If red pixel value is 100...
+The user first applies 1.5x exposure, and then +20 red. The final pixel value is 170 ((100 x 1.5) + 20).
+
+But if the user applies +20 red, then 1.5x exposure. The final pixel value is 180 ((100 + 20) x 1.5).
+
+The solution is simple, the user applies the operations in any order, but under the hood, the image processor will always apply the operations in the same order. This is what other editors such as Lightroom, Rawtherapee etc... do in order to provide consistency in the operations.
+
+<details>
+<summary>A typical order of operations</summary>
+
+#### 1. **Basic Adjustments**
+
+- **White Balance:** Adjust the white balance first to correct color casts and set a neutral tone for further edits.
+- **Exposure:** Set the overall brightness of the image.
+- **Contrast:** Enhance the difference between light and dark areas.
+- **Highlights and Shadows:** Recover details in the highlights (bright areas) and shadows (dark areas).
+- **Whites and Blacks:** Set the white and black points to define the range of tonal values.
+
+#### 2. **Tone and Color Adjustments**
+
+- **Tone Curve:** Fine-tune contrast and brightness across specific tonal ranges.
+- **HSL/Color Adjustments:** Adjust individual colors for hue, saturation, and luminance.
+
+#### 3. **Local Adjustments**
+
+- **Gradients and Brushes:** Apply local adjustments using gradient filters or adjustment brushes to specific parts of the image.
+- **Vignetting:** Apply vignetting to darken or lighten the edges of the image.
+
+#### 4. **Detail Enhancements**
+
+- **Sharpening:** Enhance edge details and overall sharpness.
+- **Noise Reduction:** Reduce luminance and color noise, especially in high ISO images.
+- **Clarity and Texture:** Increase midtone contrast (clarity) and enhance fine details (texture).
+
+#### 5. **Optics and Geometry**
+
+- **Lens Corrections:** Correct lens distortions such as vignetting, chromatic aberration, and geometric distortions.
+- **Cropping and Straightening:** Crop and straighten the image for composition.
+- **Perspective Corrections:** Adjust perspective distortions, especially in architectural photography.
+
+#### 6. **Final Adjustments and Export**
+
+- **Effects:** Add finishing effects like film grain or artistic filters.
+- **Output Sharpening:** Apply sharpening tailored to the intended output medium (screen, print, etc.).
+- **Export Settings:** Choose the appropriate export settings such as file format, resolution, and color profile.
+</details>
+
 ## Other notes
 
 - Originally, I wanted to use LibRaw, but with my lack of knowledge around C, it ran into many obstacles in compiling the program to WASM
