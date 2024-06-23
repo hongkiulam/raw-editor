@@ -34,6 +34,7 @@
 	}
 	.translucent-glass {
 		backdrop-filter: blur(50px);
+		background-color: hsl(var(--surface-1-hsl) / 80%);
 	}
 	menu {
 		position: fixed;
@@ -41,7 +42,6 @@
 		left: 0;
 		width: 100%;
 		height: var(--toolbar-height);
-		background-color: hsl(var(--surface-1-hsl) / 80%);
 		z-index: var(--z-toolbar);
 		border-bottom: var(--border-size-2) solid var(--surface-2);
 	}
@@ -52,7 +52,6 @@
 		width: var(--sidebar-width);
 		height: 100%;
 		margin-top: var(--toolbar-height);
-		background-color: hsl(var(--surface-1-hsl) / 80%);
 		border-left: var(--border-size-2) solid var(--surface-2);
 		z-index: var(--z-controls);
 		display: flex;

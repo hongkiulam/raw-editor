@@ -194,7 +194,7 @@
 
 	.ruler.major {
 		--rule-height: 6px;
-		--rule-spacing: 40px;
+		--rule-spacing: 25px;
 		--rule-color: hsl(var(--surface-4-hsl) / 100%);
 	}
 
