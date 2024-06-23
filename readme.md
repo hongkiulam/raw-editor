@@ -187,8 +187,8 @@ what is CFA (TODO)
 
 Big shoutout to these libraries
 
-- `rawloader`
-- `imagepipe`
-- `rawler`
-- `tokyo`
-- `comlink`
+- [`rawloader`](https://github.com/pedrocr/rawloader)
+- [`imagepipe`](https://github.com/pedrocr/imagepipe)
+- [`rawler`](https://github.com/dnglab/dnglab/tree/main/rawler)
+- [`tokyo`](https://github.com/tokyoapp/tokyo)
+- [`comlink`](https://github.com/GoogleChromeLabs/comlink)
