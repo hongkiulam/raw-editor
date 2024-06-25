@@ -11,8 +11,8 @@ export const createSyncedOperationControlState = <
 	throttleTime = 500
 ) => {
 	let hasChanged = false;
-	let originalValue = imageOperationsByFilename.getOperationValue(key) as Value;
-	let value = writable(originalValue);
+	const originalValue = imageOperationsByFilename.getOperationValue(key) as Value;
+	const value = writable(originalValue);
 
 	const throttledOnChange = throttle(onChange, throttleTime);
 

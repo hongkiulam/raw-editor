@@ -9,7 +9,7 @@ interface CurrentImageDataState {
 	image?: SerialisedImageData;
 }
 
-const logger = (...args: any[]) =>
+const logger = (...args: unknown[]) =>
 	console.log('%c CURRENT IMAGE DATA', 'color: lightgreen', ...args);
 const createCurrentImageDataStore = () => {
 	const { subscribe, update, set } = writable<CurrentImageDataState>({ fileName: '' });

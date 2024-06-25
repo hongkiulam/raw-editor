@@ -29,6 +29,7 @@
 
 	const onValueChange: CreateSliderProps['onValueChange'] = ({ curr, next }) => {
 		const nextValue = next[0];
+		// TODO: dont stick if we are using arrow keys
 		if (isStickingToBase) {
 			const upperBound = base + maxStickDistance;
 			const lowerBound = base - maxStickDistance;

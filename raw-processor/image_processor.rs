@@ -1,6 +1,6 @@
 use image::DynamicImage;
 use rawler::decoders::RawMetadata;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 
 use crate::decode;
@@ -75,7 +75,7 @@ impl ImageProcessor {
 
     pub fn apply_operations(&mut self) -> Vec<u8> {
         // create a HashMap to store the operations that need to be applied, deduped by operation type
-        let mut deduped_operations  = HashMap::new();
+        let mut deduped_operations = HashMap::new();
 
         // iterate over the operations (oldest operation first)
         // HashMap will automatically dedupe the operations by operation type, keeping the most recent value
@@ -88,12 +88,15 @@ impl ImageProcessor {
 
         // apply the operations in our desired order
 
-        // Basic Adjustments: White Balance, Exposure
+        // Basic Adjustments: White Balance, Exposure, Contrast
         if let Some(operation) = deduped_operations.get(&OperationType::Exposure) {
             operation(&mut edited_image);
         }
+        if let Some(operation) = deduped_operations.get(&OperationType::Contrast) {
+            operation(&mut edited_image);
+        }
 
-        // Tone and Color: 
+        // Tone and Color:
 
         // Optics and Geometry: Rotation
         if let Some(operation) = deduped_operations.get(&OperationType::Rotation) {
@@ -116,6 +119,7 @@ impl ImageProcessor {
                     .for_each(|pixel| {
                         let multiplier = value * 2.0; // we want to scale the multiple by 2, so that the max/min values of 1/-1 are 2/-2. We could do this client-side, but I've chosen to couple it here.
                         let adjust_exposure_for_pixel = |pixel: &mut u16| {
+                            // * is a dereference operator, which allows us to modify the value that pixel points to
                             *pixel = (*pixel as f32 * (1.0 + multiplier))
                                 .clamp(0.0, RGB_MAX_16BIT as f32)
                                 as u16;
@@ -136,6 +140,30 @@ impl ImageProcessor {
                 180.0 => *image = image.rotate180(),
                 270.0 => *image = image.rotate270(),
                 _ => (),
+            }),
+        ));
+    }
+
+    pub fn set_contrast(&mut self, contrast: f32) {
+        self.operations.push((
+            OperationType::Contrast,
+            Box::new(move |image: &mut DynamicImage| {
+                log::info!("contrast: {}", contrast);
+                image
+                    .as_mut_rgb16()
+                    .unwrap()
+                    .pixels_mut()
+                    .for_each(|pixel| {
+                        // TODO: fix
+                        let adjust_contrast_for_pixel = |pixel: &mut u16| {
+                            *pixel = (*pixel as f32 - 0.5 * (1.0 + contrast) + 0.5)
+                                .clamp(0.0, RGB_MAX_16BIT as f32)
+                                as u16;
+                        };
+                        adjust_contrast_for_pixel(&mut pixel[0]);
+                        adjust_contrast_for_pixel(&mut pixel[1]);
+                        adjust_contrast_for_pixel(&mut pixel[2]);
+                    });
             }),
         ));
     }

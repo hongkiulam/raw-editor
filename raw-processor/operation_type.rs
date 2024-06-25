@@ -1,13 +1,10 @@
 use std::hash::{Hash, Hasher};
 /// Represents the different types of operations that can be performed on an image.
 pub enum OperationType {
-    /// Exposure adjustment operation.
     Exposure,
-    /// White balance adjustment operation.
     WhiteBalance,
-    /// Rotation operation.
     Rotation,
-    // Add other operation types here
+    Contrast,
 }
 
 impl PartialEq for OperationType {

@@ -66,6 +66,12 @@ const rawProcessorWorker = {
 			applyOperations();
 		}
 	},
+	setContrast: (value: number) => {
+		if (currentImageProcessor) {
+			currentImageProcessor.set_contrast(value);
+			applyOperations();
+		}
+	},
 	setRotation: (angle: number) => {
 		if (currentImageProcessor) {
 			currentImageProcessor.set_rotation(angle);

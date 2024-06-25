@@ -1,14 +1,16 @@
-import { derived, get, writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 import { currentImageData } from './currentImageData';
 
 export interface Operations {
 	exposure: number;
 	rotation: number;
+	contrast: number;
 }
 
 const defaultOperations: Operations = {
 	exposure: 0,
-	rotation: 0
+	rotation: 0,
+	contrast: 0
 };
 
 const isomorphicLocalStorage =
@@ -41,6 +43,7 @@ const createImageOperationsStore = () => {
 			});
 			return defaultOperations;
 		}
+		// TODO this still seems to be broken
 		return { ...defaultOperations, ...existingOperations }; // 👈 This ensures that if new operations are added, they are backfilled to existing cache
 	};
 
