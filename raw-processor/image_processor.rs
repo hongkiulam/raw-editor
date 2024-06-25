@@ -156,9 +156,9 @@ impl ImageProcessor {
                     .for_each(|pixel| {
                         // TODO: fix
                         let adjust_contrast_for_pixel = |pixel: &mut u16| {
-                            *pixel = (*pixel as f32 - 0.5 * (1.0 + contrast) + 0.5)
-                                .clamp(0.0, RGB_MAX_16BIT as f32)
-                                as u16;
+                            // contrast formula: clamp((pixel - mean) x contrast + mean)
+                            let mean: f32 = RGB_MAX_16BIT as f32 / 2.0;
+                            *pixel = ((*pixel as f32 - mean) * (1.0 + contrast) + mean).clamp(0.0, RGB_MAX_16BIT as f32) as u16;
                         };
                         adjust_contrast_for_pixel(&mut pixel[0]);
                         adjust_contrast_for_pixel(&mut pixel[1]);

@@ -35,8 +35,8 @@
 		display: contents;
 	}
 	.translucent-glass {
-		backdrop-filter: blur(50px);
-		background-color: hsl(var(--surface-1-hsl) / 80%);
+		backdrop-filter: blur(15px);
+		background-color: hsl(var(--surface-1-hsl) / 70%);
 	}
 	menu {
 		position: fixed;

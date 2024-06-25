@@ -112,7 +112,7 @@
 		align-items: center;
 		isolation: isolate;
 		/* colour is ligher than the sidebar */
-		background: hsl(var(--surface-4-hsl) / 50%);
+		background: hsl(var(--surface-4-hsl) / 30%);
 		/* font size for all nested elements should be small */
 		font-size: var(--font-size-0);
 		color: var(--text-1);
