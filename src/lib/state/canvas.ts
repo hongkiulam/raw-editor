@@ -1,21 +1,33 @@
 import { derived, get, writable } from 'svelte/store';
 
 interface CanvasState {
-	lastX: number;
-	lastY: number;
 	isDragging: boolean;
-	originX: number;
-	originY: number;
+
+	previousPanX: number;
+	previousPanY: number;
+	/** Distance from the offsetted image origin X */
+	imageDistanceFromOffsetX: number;
+	/** Distance from the offsetted image origin Y */
+	imageDistanceFromOffsetY: number;
+	/** Distance from the true origin (viewport), to the initial X position of the image */
+	imageOffsetX?: number;
+	/** Distance from the true origin (viewport), to the initial Y position of the image */
+	imageOffsetY?: number;
+
 	zoom: number;
 	pinchDistance?: number;
 }
 
 const initialInteractionState: Omit<CanvasState, ''> = {
-	lastX: 0,
-	lastY: 0,
 	isDragging: false,
-	originX: 0,
-	originY: 0,
+
+	previousPanX: 0,
+	previousPanY: 0,
+	imageDistanceFromOffsetX: 0,
+	imageDistanceFromOffsetY: 0,
+	imageOffsetX: undefined,
+	imageOffsetY: undefined,
+
 	zoom: 1,
 	pinchDistance: undefined
 };
@@ -29,8 +41,10 @@ const createCanvasStore = () => {
 
 	const handleZoomUpdate = (
 		zoomDirection: 'IN' | 'OUT',
-		zoomOriginX: number,
-		zoomOriginY: number
+		/** x position for the zursor, origin for zoom */
+		cursorOriginX: number,
+		/** y position for the zursor, origin for zoom */
+		cursorOriginY: number
 	) => {
 		canvasState.update((state) => {
 			const zoomSensitivity = 0.01; // 0.01 works better for mac trackpad
@@ -38,8 +52,35 @@ const createCanvasStore = () => {
 
 			const newZoom = state.zoom * wheel;
 
-			state.originX = zoomOriginX - ((zoomOriginX - state.originX) * newZoom) / state.zoom;
-			state.originY = zoomOriginY - ((zoomOriginY - state.originY) * newZoom) / state.zoom;
+			// |root |offs |img  |c
+			// |r----|o----|i----|c <- cursorOriginX (12px)
+			// |r    |o----|i----|c <- cursorXCalibratedForImageOffset (8px)
+			const cursorXCalibratedForImageOffset = cursorOriginX - state.imageOffsetX!; // we _should_ have this value, hence !
+			const cursorYCalibratedForImageOffset = cursorOriginY - state.imageOffsetY!; // we _should_ have this value, hence !
+
+			// So this is how far the cursor is away from the top left corner of the image
+			// relative to the cursor, i.e. if the cursor is to the right of the image origin, these values will be negative
+			// |r    |o----|i----|c <- cursorXCalibratedForImageOffset (8px)
+			// |r    |o----|i    |c <- state.imageDistanceFromOffsetX (4px)
+			// |r    |o    |i----|c <- imageDistToCursorX (-4px)
+			const imageDistToCursorX = state.imageDistanceFromOffsetX - cursorXCalibratedForImageOffset;
+			const imageDistToCursorY = state.imageDistanceFromOffsetY - cursorYCalibratedForImageOffset;
+
+			const zoomChangeFactor = newZoom / state.zoom;
+
+			// This is how far the cursor should be from the top left corner of the image after zooming
+			// e.g. when the cursor is inside the image, and we zoom in, then the distance should increase (image expands)
+			// |r----|o----|i----|c
+			// |r    |o??|i------|c <- zoomedImageDistToCursorX (-6px)
+			const zoomedImageDistToCursorX = imageDistToCursorX * zoomChangeFactor;
+			const zoomedImageDistToCursorY = imageDistToCursorY * zoomChangeFactor;
+
+			// Now that we have the zoomed distance that the origin of the image should be from the cursor position
+			// we can add the zoom distance to the cursor position to get the new image origin coords
+			// |r    |o--|i      |c <- state.imageDistanceFromOffsetX (2px)
+			state.imageDistanceFromOffsetX = zoomedImageDistToCursorX + cursorXCalibratedForImageOffset;
+			state.imageDistanceFromOffsetY = zoomedImageDistToCursorY + cursorYCalibratedForImageOffset;
+
 			state.zoom = newZoom;
 			return state;
 		});
@@ -51,8 +92,8 @@ const createCanvasStore = () => {
 
 	const onPanStart = (event: MouseEvent | Touch) => {
 		canvasState.update((state) => {
-			state.lastX = 'offsetX' in event ? event.offsetX : event.clientX;
-			state.lastY = 'offsetY' in event ? event.offsetY : event.clientY;
+			state.previousPanX = 'offsetX' in event ? event.offsetX : event.clientX;
+			state.previousPanY = 'offsetY' in event ? event.offsetY : event.clientY;
 			state.isDragging = true;
 			return state;
 		});
@@ -66,12 +107,12 @@ const createCanvasStore = () => {
 		canvasState.update((state) => {
 			const eventX = 'offsetX' in event ? event.offsetX : event.clientX;
 			const eventY = 'offsetY' in event ? event.offsetY : event.clientY;
-			const dx = eventX - state.lastX;
-			const dy = eventY - state.lastY;
-			state.originX += dx;
-			state.originY += dy;
-			state.lastX = eventX;
-			state.lastY = eventY;
+			const dx = eventX - state.previousPanX;
+			const dy = eventY - state.previousPanY;
+			state.imageDistanceFromOffsetX += dx;
+			state.imageDistanceFromOffsetY += dy;
+			state.previousPanX = eventX;
+			state.previousPanY = eventY;
 			return state;
 		});
 	};
@@ -138,9 +179,44 @@ const createCanvasStore = () => {
 		canvasState.update((state) => ({ ...state, ...initialInteractionState }));
 	};
 
+	/**
+	 * Typically this will happen if the viewport changes
+	 * @param x
+	 * @param y
+	 */
+	const setImageOffsetOrigin = (x: number, y: number) => {
+		const { imageOffsetX: imageOffsetOriginX, imageOffsetY: imageOffsetOriginY } = get(canvasState);
+		console.log({ x, y });
+		const imageOffsetOriginUnchanged = x === imageOffsetOriginX && y === imageOffsetOriginY;
+		if (imageOffsetOriginUnchanged) return;
+
+		canvasState.update((state) => {
+			state.imageOffsetX = x;
+			state.imageOffsetY = y;
+			return state;
+		});
+	};
+	// canvasState.update(state => {
+	// 	console.table(get(canvasState))
+	// 	const { imageOffsetOriginX, imageOffsetOriginY } = state
+	// 	// do nothing if offset origin hasn't changed
+	// 	const imageOffsetOriginUnchanged = x === imageOffsetOriginX && y === imageOffsetOriginY
+	// 	const originHasntBeenSet = imageOffsetOriginX === undefined || imageOffsetOriginY === undefined;
+	// 	if (imageOffsetOriginUnchanged || originHasntBeenSet) return
+	// 	// get how much the offset has changed
+	// 	// then we can apply that change onto image distance
+	// 	const dx = x - state.imageOffsetOriginX;
+	// 	const dy = y - state.imageOffsetOriginY;
+
+	// 	state.imageDistanceFromOriginX = state.imageDistanceFromOriginX - dx;
+	// 	state.imageDistanceFromOriginY = state.imageDistanceFromOriginY - dy;
+	// 	return state
+	// })
+
 	return {
 		...readonlyCanvasState,
 		resetInteractions,
+		setImageOffsetOrigin,
 		eventHandlers: {
 			onMouseDown: onPanStart,
 			onMouseMove: onPan,

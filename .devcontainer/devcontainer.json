@@ -8,7 +8,7 @@
     "vscode": {
       "settings": {},
       "extensions": [
-        "jetpack-io.devbox",
+        // "jetpack-io.devbox",
         "svelte.svelte-vscode",
         "vscodevim.vim"
       ]

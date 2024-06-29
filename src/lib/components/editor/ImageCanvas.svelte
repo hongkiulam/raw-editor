@@ -4,7 +4,6 @@
 	import type { SerialisedImageData } from '../../workers/raw-processor';
 
 	// todo, disable system viewport zooming for the canvas area
-	// todo: retain image quality by handling zoom and position in the canvas using the drawImage arguments (on the scaled canvas)
 	const canvasLogger = (...args: any[]) => console.log('%c CANVAS', 'color: yellow', ...args);
 
 	let imageBoundingArea = $state({ width: 0, height: 0 });
@@ -37,34 +36,9 @@
 		}
 	});
 
-	let scaledImageSource: HTMLCanvasElement | undefined = $state();
-	$effect(() => {
-		if (imageSource) {
-			canvasLogger('Redrawing scaled image source');
-			const canvas = document.createElement('canvas');
-			const ctx = canvas.getContext('2d');
-			if (!ctx) {
-				throw new Error('Could not get context');
-			}
-			// fit this canvas to the bounding area
-			canvas.width = imageBoundingArea.width;
-			canvas.height = imageBoundingArea.height;
-			const goodFitDimensions = getGoodFitDimensions(imageSource, canvas);
-			ctx.reset();
-			ctx.drawImage(
-				imageSource,
-				goodFitDimensions.x,
-				goodFitDimensions.y,
-				goodFitDimensions.width,
-				goodFitDimensions.height
-			);
-			scaledImageSource = canvas;
-		}
-	});
-
 	let interactionCanvas: HTMLCanvasElement | undefined;
 	$effect(() => {
-		if (scaledImageSource && interactionCanvas) {
+		if (imageSource && interactionCanvas) {
 			canvasLogger('Redrawing interaction canvas');
 			const ctx = interactionCanvas.getContext('2d');
 			if (!ctx) {
@@ -75,19 +49,41 @@
 			ctx.reset();
 			// render the scaled canvas into the overflow canvas, so that we can pan, zoom, across the whole viewport
 			// since we already scaled and positioned with imageCanvas, we can just render to 0,0
-			ctx.translate($canvasState.originX, $canvasState.originY);
-			ctx.scale($canvasState.zoom, $canvasState.zoom);
+			// ctx.translate($canvasState.originX, $canvasState.originY);
+			// ctx.scale($canvasState.zoom, $canvasState.zoom);
 			const toolbarHeight = 56;
-			ctx.drawImage(scaledImageSource, 0, toolbarHeight);
+			// get the dimensions that will fit the image into the bounding area
+			const goodFitDimensions = getGoodFitDimensions(imageSource, {
+				width: imageBoundingArea.width,
+				height: imageBoundingArea.height
+			});
+
+			// However, since the bounding area is not the same as the canvas size, we need to adjust the coordinates
+			// This is heavily assumed based on the styling we apply, where the bounding area is aligned left, but offset by the toolbar height
+			const imageOffsetX = goodFitDimensions.x;
+			const imageOffsetY = goodFitDimensions.y + toolbarHeight;
+
+			// Provide the canvasState with the offset origin, so that it can be used to calculate zoom positioning
+			canvasState.setImageOffsetOrigin(imageOffsetX, imageOffsetY);
+			ctx.drawImage(
+				imageSource, // source
+				imageOffsetX + $canvasState.imageDistanceFromOffsetX, // dx
+				imageOffsetY + $canvasState.imageDistanceFromOffsetY, // dy
+				goodFitDimensions.width * $canvasState.zoom, // dw
+				goodFitDimensions.height * $canvasState.zoom // dh
+			);
 		}
 	});
 
-	const getGoodFitDimensions = <Dimensions extends { width: number; height: number }>(
+	const getGoodFitDimensions = <
+		Dimensions extends { width: number; height: number },
+		TargetDimensions extends { width: number; height: number }
+	>(
 		imageDimensions: Dimensions,
-		canvasDimensions: Dimensions
+		targetDimensions: TargetDimensions
 	) => {
-		const containerW = canvasDimensions.width;
-		const containerH = canvasDimensions.height;
+		const containerW = targetDimensions.width;
+		const containerH = targetDimensions.height;
 		const imageAspectRatio = imageDimensions.width / imageDimensions.height;
 
 		const containerAspectRatio = containerW / containerH;
@@ -96,10 +92,12 @@
 		let outputWidth, outputHeight, x, y;
 
 		if (imageAspectRatio > containerAspectRatio) {
-			// width fills container
+			// image width fills target container
 			outputWidth = containerW;
 			outputHeight = containerW / imageAspectRatio;
+			// since the width will fill the container, align it to the left of the container
 			x = 0;
+			// since the height will not fill the container, we need to center it
 			y = (containerH - outputHeight) / 2;
 		} else {
 			// height fills container
