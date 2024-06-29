@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { canvasState } from '../../state/canvas';
 	import { currentImageData } from '../../state/currentImageData';
 	import type { SerialisedImageData } from '../../workers/raw-processor';
@@ -109,6 +110,20 @@
 
 		return { width: outputWidth, height: outputHeight, x, y };
 	};
+
+	onMount(() => {
+		const disableMacTrackpadZoom = (event: MouseEvent) => {
+			// Disable ctrl + wheel default behaviour (page zoom). Also disabled Mac trackpad zoom 👈 which is what we want
+			if (event.ctrlKey) {
+				event.preventDefault();
+			}
+		};
+
+		window.addEventListener('wheel', disableMacTrackpadZoom, { passive: false });
+		return () => {
+			window.removeEventListener('wheel', disableMacTrackpadZoom);
+		};
+	});
 </script>
 
 <!-- 👇 This div will fill the parent container, to provide us with the correct space to initially scale the image into -->

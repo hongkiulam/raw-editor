@@ -47,7 +47,7 @@ const createCanvasStore = () => {
 		cursorOriginY: number
 	) => {
 		canvasState.update((state) => {
-			const zoomSensitivity = 0.01; // 0.01 works better for mac trackpad
+			const zoomSensitivity = 0.03; // 0.01 works better for mac trackpad
 			const wheel = zoomDirection === 'IN' ? 1 + zoomSensitivity : 1 - zoomSensitivity;
 
 			const newZoom = state.zoom * wheel;
@@ -186,8 +186,9 @@ const createCanvasStore = () => {
 	 */
 	const setImageOffsetOrigin = (x: number, y: number) => {
 		const { imageOffsetX: imageOffsetOriginX, imageOffsetY: imageOffsetOriginY } = get(canvasState);
-		console.log({ x, y });
+
 		const imageOffsetOriginUnchanged = x === imageOffsetOriginX && y === imageOffsetOriginY;
+
 		if (imageOffsetOriginUnchanged) return;
 
 		canvasState.update((state) => {
@@ -196,22 +197,6 @@ const createCanvasStore = () => {
 			return state;
 		});
 	};
-	// canvasState.update(state => {
-	// 	console.table(get(canvasState))
-	// 	const { imageOffsetOriginX, imageOffsetOriginY } = state
-	// 	// do nothing if offset origin hasn't changed
-	// 	const imageOffsetOriginUnchanged = x === imageOffsetOriginX && y === imageOffsetOriginY
-	// 	const originHasntBeenSet = imageOffsetOriginX === undefined || imageOffsetOriginY === undefined;
-	// 	if (imageOffsetOriginUnchanged || originHasntBeenSet) return
-	// 	// get how much the offset has changed
-	// 	// then we can apply that change onto image distance
-	// 	const dx = x - state.imageOffsetOriginX;
-	// 	const dy = y - state.imageOffsetOriginY;
-
-	// 	state.imageDistanceFromOriginX = state.imageDistanceFromOriginX - dx;
-	// 	state.imageDistanceFromOriginY = state.imageDistanceFromOriginY - dy;
-	// 	return state
-	// })
 
 	return {
 		...readonlyCanvasState,
