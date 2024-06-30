@@ -10,7 +10,7 @@
 	height: 100vh;
 	font-family: 'Roboto', sans-serif;
 	background: var(--surface-1);
-	background-image: radial-gradient(var(--text-2) 1px, transparent 0);
+	background-image: radial-gradient(hsl(var(--text-2-hsl) / 50%) 1px, transparent 0);
 	background-size: 40px 40px;
 	background-position: -19px -19px;
 	overflow: hidden;
@@ -30,6 +30,7 @@
 
 	--text-1: var(--gray-8);
 	--text-2: var(--gray-7);
+	--text-2-hsl: var(--gray-7-hsl);
 
 	--surface-1: var(--gray-0);
 	--surface-2: var(--gray-1);
@@ -48,6 +49,7 @@
 
 		--text-1: var(--gray-3);
 		--text-2: var(--gray-5);
+		--text-2-hsl: var(--gray-5-hsl);
 
 		--surface-1: var(--gray-9);
 		--surface-2: var(--gray-8);
