@@ -182,7 +182,7 @@ impl ImageProcessor {
     // }
 
     // TODO, how to get pixel channels from rgba_image
-    // TODO, where do we get the rgba_image from? maybe after apply operations?
+    // TODO, where do we get the rgba_image from? maybe after apply operations? can try chunks_exact(4)
     // pub fn get_histogram(rgba_image: Vec<u8>) -> Vec<u8> {
     //     let mut hist_r = vec![0u8; RGB_MAX_8BIT as usize];
     //     let mut hist_g = vec![0u8; RGB_MAX_8BIT as usize];
