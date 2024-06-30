@@ -10,7 +10,8 @@
       "extensions": [
         // "jetpack-io.devbox",
         "svelte.svelte-vscode",
-        "vscodevim.vim"
+        "vscodevim.vim",
+        "rust-lang.rust-analyzer"
       ]
     }
   },

@@ -105,6 +105,7 @@ impl ImageProcessor {
 
         self.edited_width = edited_image.width();
         self.edited_height = edited_image.height();
+
         edited_image.into_rgba8().to_vec()
     }
 
@@ -154,11 +155,12 @@ impl ImageProcessor {
                     .unwrap()
                     .pixels_mut()
                     .for_each(|pixel| {
-                        // TODO: fix
                         let adjust_contrast_for_pixel = |pixel: &mut u16| {
                             // contrast formula: clamp((pixel - mean) x contrast + mean)
                             let mean: f32 = RGB_MAX_16BIT as f32 / 2.0;
-                            *pixel = ((*pixel as f32 - mean) * (1.0 + contrast) + mean).clamp(0.0, RGB_MAX_16BIT as f32) as u16;
+                            *pixel = ((*pixel as f32 - mean) * (1.0 + contrast) + mean)
+                                .clamp(0.0, RGB_MAX_16BIT as f32)
+                                as u16;
                         };
                         adjust_contrast_for_pixel(&mut pixel[0]);
                         adjust_contrast_for_pixel(&mut pixel[1]);
@@ -178,6 +180,44 @@ impl ImageProcessor {
     //             });
     //         }));
     // }
+
+    // TODO, how to get pixel channels from rgba_image
+    // TODO, where do we get the rgba_image from? maybe after apply operations?
+    // pub fn get_histogram(rgba_image: Vec<u8>) -> Vec<u8> {
+    //     let mut hist_r = vec![0u8; RGB_MAX_8BIT as usize];
+    //     let mut hist_g = vec![0u8; RGB_MAX_8BIT as usize];
+    //     let mut hist_b = vec![0u8; RGB_MAX_8BIT as usize];
+    //     let mut hist_lum = vec![0u8; RGB_MAX_8BIT as usize];
+
+    //     rgba_image.into_iter().for_each(|pixel| {
+    //         let lum = ImageProcessor::calculate_luminosity([pixel[0], pixel[1], pixel[2]]);
+
+    //         // if pixel value for R is 1000, then we do hist_r[1000] += 1
+    //         // essentially, we are incrementing the count of the pixel value in the histogram
+    //         hist_r[pixel[0] as usize] += 1;
+    //         hist_g[pixel[1] as usize] += 1;
+    //         hist_b[pixel[2] as usize] += 1;
+    //         hist_lum[lum as usize] += 1;
+    //     });
+
+    //     hist_lum
+    // }
+
+    // from claude ai, find a better source?
+    // todo, convert to use u8, probably, depends what we pass into get_histogram
+    fn calculate_luminosity(pixel: [u16; 3]) -> u16 {
+        // Convert to f32 for precision in calculation
+        let r = pixel[0] as f32;
+        let g = pixel[1] as f32;
+        let b = pixel[2] as f32;
+
+        // Calculate luminosity
+        // These coefficients are based on human perception of color
+        let lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+        // Convert back to u16 and ensure it's within 0-65535 range
+        lum.round().clamp(0.0, 65535.0) as u16
+    }
 
     pub fn process(&mut self) -> Vec<u8> {
         self.apply_operations()
