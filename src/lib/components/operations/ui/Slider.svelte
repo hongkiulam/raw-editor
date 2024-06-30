@@ -4,7 +4,6 @@
 	import { writable } from 'svelte/store';
 	import { doubleTap } from '../../../helpers/dblTapAction';
 
-	// TODO Convert this back to single number slider but implement the range block ourselves
 	export let base: number;
 	export let min: number;
 	export let max: number;
@@ -12,6 +11,7 @@
 	export let step = 0.01;
 	export let label: string;
 
+	const DOUBLE_TAP_RESET_TRANSITION_TIME = 300;
 	// Out custom store to provide to the Melt UI Slider
 	// ℹ️ Provide two values to activate the range Slider, while we are not using the range functionality,
 	// it provides us the correct elements to style the slider in the way we want (highlighted mid section)
@@ -24,12 +24,17 @@
 		});
 	});
 
+	/** track if we are dragging, if so we should enable sticking. otherwise don't stick (arrow key usage) */
+	let isDragging = false;
 	let isStickingToBase = false;
 	const maxStickDistance = 5 * step;
 
+	const setDraggingOn = () => (isDragging = true);
+
+	const setDraggingOff = () => (isDragging = false);
+
 	const onValueChange: CreateSliderProps['onValueChange'] = ({ curr, next }) => {
 		const nextValue = next[0];
-		// TODO: dont stick if we are using arrow keys
 		if (isStickingToBase) {
 			const upperBound = base + maxStickDistance;
 			const lowerBound = base - maxStickDistance;
@@ -42,8 +47,7 @@
 				return curr;
 			}
 		}
-
-		if (nextValue === base) {
+		if (nextValue === base && isDragging) {
 			isStickingToBase = true;
 		}
 
@@ -77,17 +81,23 @@
 	let doubleTapTransitionToBase = false;
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <span
 	use:melt={$root}
 	class="root"
+	style:--double-tap-reset-transition-duration={DOUBLE_TAP_RESET_TRANSITION_TIME + 'ms'}
 	class:double-tap-transition={doubleTapTransitionToBase}
 	use:doubleTap={() => {
 		doubleTapTransitionToBase = true;
 		setTimeout(() => {
 			doubleTapTransitionToBase = false;
-		}, 300); // animation time
+		}, DOUBLE_TAP_RESET_TRANSITION_TIME); // animation time
 		meltValueStore.set([base]);
 	}}
+	onpointerdown={setDraggingOn}
+	onmousedown={setDraggingOn}
+	onpointerup={setDraggingOff}
+	onmouseup={setDraggingOff}
 >
 	<div class="field-info">
 		<span>{label}</span>
@@ -204,7 +214,7 @@
 	.root.double-tap-transition {
 		.thumb,
 		.range {
-			transition: all 0.3s ease;
+			transition: all var(--double-tap-reset-transition-duration) ease;
 		}
 	}
 
