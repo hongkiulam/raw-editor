@@ -1,11 +1,8 @@
-/* FIX */
-/* Pulls in CSS Variables */
-@import 'https://unpkg.com/open-props/open-props.min.css';
-/* Standard normalisation + some useful theme bound variables (surface, text, etc.) */
-@import 'https://unpkg.com/open-props/normalize.min.css';
-@import 'https://unpkg.com/open-props/colors-hsl.min.css';
+@import 'open-props/open-props.min.css';
+@import 'open-props/normalize.min.css';
+@import 'open-props/colors-hsl.min.css';
 
-:global(body) {
+body {
 	width: 100%;
 	height: 100vh;
 	font-family: 'Roboto', sans-serif;

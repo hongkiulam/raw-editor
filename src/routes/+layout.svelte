@@ -2,6 +2,8 @@
 	import { browser } from '$app/environment';
 	import { currentImageData } from '../lib/state/currentImageData';
 	import { rawProcessorWorker } from '../lib/workers';
+	import '../app.css';
+
 	const { children } = $props();
 
 	const initialiseWasm = async () => {
@@ -18,7 +20,3 @@
 {:catch}
 	<p>failed to load raw-processor</p>
 {/await}
-
-<style>
-	@import '../app.css';
-</style>
