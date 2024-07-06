@@ -1,3 +1,4 @@
+use crate::dispatch_event_to_js::dispatch_event_to_worker;
 use image::DynamicImage;
 use log;
 use rawler::buffer::Buffer;
@@ -11,17 +12,15 @@ use wasm_bindgen::prelude::*;
 pub fn decode_raw_image(data: &[u8]) -> Result<(RawMetadata, DynamicImage), JsValue> {
     let buf = Buffer::from(data.to_vec());
     let mut rawfile = RawFile::from(buf);
-    log::info!("Got raw file");
+    dispatch_event_to_worker("decode:obtained_raw");
 
     let decoder_params = RawDecodeParams { image_index: 0 };
 
     if let Ok(decoder) = get_decoder(&mut rawfile) {
-        log::info!("Successfully got decoder for rawfile");
-
         let metadata = decoder
             .raw_metadata(&mut rawfile, decoder_params.clone())
             .map_err(|e| JsValue::from_str(&e.to_string()))?;
-        log::info!("Decoded metadata");
+        dispatch_event_to_worker("decode:decoded_metadata");
         // 👆 the ? operator at the end is used by Rust to propagate errors up the call stack
         // however, the error from .raw_image (RawlerError) is not compatible with JsValue (the return type of this function)
         // so we need to convert it to a string first
@@ -29,11 +28,10 @@ pub fn decode_raw_image(data: &[u8]) -> Result<(RawMetadata, DynamicImage), JsVa
         let rawimage = decoder
             .raw_image(&mut rawfile, decoder_params, false)
             .map_err(|e| JsValue::from_str(&e.to_string()))?;
-        log::info!("decoded image");
+        dispatch_event_to_worker("decode:decoded_raw");
 
         let dev = RawDevelop::default();
-        log::info!("got rawimage developer");
-        log::info!("got rawimage developer2");
+        dispatch_event_to_worker("decode:prepare_raw_developer");
         // TODO: here is where we get the error 'unreachable'. not sure why the panic hook is not picking it up, but it is being thrown from within
         // the rawler crate. From expand_bayer_rgb -> out.pixels_mut().par_chunks_exact_mut()
         let developed_img = dev.develop_intermediate(&rawimage).unwrap_throw();
@@ -44,8 +42,7 @@ pub fn decode_raw_image(data: &[u8]) -> Result<(RawMetadata, DynamicImage), JsVa
         // }
         // // if developed_img is error, return error
         // let developed_img = developed_img_result.unwrap();
-        log::info!("got developed image");
-
+        dispatch_event_to_worker("decode:developed_raw");
         let mut dynamic_image = developed_img.to_dynamic_image().unwrap();
         log::info!("got dynamic image");
 
@@ -55,6 +52,7 @@ pub fn decode_raw_image(data: &[u8]) -> Result<(RawMetadata, DynamicImage), JsVa
             _ => dynamic_image,
         };
         log::info!("rotated image");
+        dispatch_event_to_worker("decode:completed");
 
         return Ok((metadata.clone(), dynamic_image.clone()));
     } else {

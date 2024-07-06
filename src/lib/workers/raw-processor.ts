@@ -22,6 +22,14 @@ export type SerialisedImageData = ReturnType<typeof serialisedImageData>;
 // We expose this via a subscribe function from the worker, the main thread can then subscribe to this store and update the UI
 const latestImageData = writable<SerialisedImageData | undefined>(undefined);
 
+const DECODING_EVENTS = [
+	'decode:obtained_raw',
+	'decode:decoded_metadata',
+	'decode:decoded_raw',
+	'decode:prepare_raw_developer',
+	'decode:developed_raw',
+	'decode:completed'
+] as const;
 /**
  * Applies the operations to the current image processor and updates the store with the new image data
  */
@@ -54,7 +62,6 @@ const rawProcessorWorker = {
 		if (operations.exposure !== 0) {
 			imageProcessor.set_exposure(operations.exposure);
 		}
-		console.log('rotation', operations.rotation);
 		if (operations.rotation !== 0) {
 			imageProcessor.set_rotation(operations.rotation);
 		}
@@ -95,6 +102,27 @@ const rawProcessorWorker = {
 			if (latestData) {
 				callback(latestData);
 			}
+		});
+	},
+	/**
+	 * Subscribes to decode progress.
+	 *
+	 * Given this is exposed by the worker, the callback needs to be passed in using a Comlink helper
+	 * @example
+	 * const callback = Comlink.proxy((data: string) => {
+	 *  console.log('New event', data);
+	 * });
+	 * worker.subscribeToDecodeProgress(callback);
+	 */
+	subscribeToDecodeProgress: (callback: (data: string) => void) => {
+		DECODING_EVENTS.forEach((EVENT_NAME) => {
+			self.addEventListener(
+				EVENT_NAME,
+				() => {
+					callback(EVENT_NAME);
+				},
+				{ once: true }
+			);
 		});
 	}
 };
