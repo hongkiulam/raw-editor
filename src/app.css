@@ -58,3 +58,8 @@ body {
 		--surface-4-hsl: var(--gray-6-hsl);
 	}
 }
+
+.translucent-glass {
+	backdrop-filter: blur(15px);
+	background-color: hsl(var(--surface-1-hsl) / 70%);
+}

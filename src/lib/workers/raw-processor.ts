@@ -4,8 +4,9 @@ import * as Comlink from 'comlink';
 import init, * as raw_editor from '$lib/raw-processor';
 import type { Operations } from '../state/imageOperations';
 import { writable } from 'svelte/store';
+import { DecodeEvent, type DecodeEventName } from '../helpers/decodeEvents';
 
-const workerLogger = (...args: any[]) => console.log('%c WORKER', 'color: lightblue', ...args);
+const workerLogger = <Arg>(...args: Arg[]) => console.log('%c WORKER', 'color: lightblue', ...args);
 let currentImageProcessor: raw_editor.ImageProcessor | undefined = undefined;
 
 const serialisedImageData = (rawFile: raw_editor.ImageProcessor, rgba: Uint8Array) => {
@@ -22,14 +23,6 @@ export type SerialisedImageData = ReturnType<typeof serialisedImageData>;
 // We expose this via a subscribe function from the worker, the main thread can then subscribe to this store and update the UI
 const latestImageData = writable<SerialisedImageData | undefined>(undefined);
 
-const DECODING_EVENTS = [
-	'decode:obtained_raw',
-	'decode:decoded_metadata',
-	'decode:decoded_raw',
-	'decode:prepare_raw_developer',
-	'decode:developed_raw',
-	'decode:completed'
-] as const;
 /**
  * Applies the operations to the current image processor and updates the store with the new image data
  */
@@ -114,8 +107,8 @@ const rawProcessorWorker = {
 	 * });
 	 * worker.subscribeToDecodeProgress(callback);
 	 */
-	subscribeToDecodeProgress: (callback: (data: string) => void) => {
-		DECODING_EVENTS.forEach((EVENT_NAME) => {
+	subscribeToDecodeProgress: (callback: (data: DecodeEventName) => void) => {
+		Object.values(DecodeEvent).forEach((EVENT_NAME) => {
 			self.addEventListener(
 				EVENT_NAME,
 				() => {

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { currentImageData } from '../lib/state/currentImageData';
 	import { rawProcessorWorker } from '../lib/workers';
 	import '../app.css';
 
