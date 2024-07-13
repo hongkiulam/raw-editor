@@ -19,3 +19,10 @@
 {:catch}
 	<p>failed to load raw-processor</p>
 {/await}
+
+<style>
+	:global(body) {
+		display: grid;
+		place-items: center;
+	}
+</style>
