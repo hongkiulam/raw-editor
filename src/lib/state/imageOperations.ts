@@ -1,5 +1,7 @@
 import { get, writable } from 'svelte/store';
 import { currentImageData } from './currentImageData';
+import { rawProcessorWorker } from '../workers';
+import { throttle } from 'lodash-es';
 
 export interface Operations {
 	exposure: number;
@@ -21,60 +23,49 @@ const isomorphicLocalStorage =
 			}
 		: window.localStorage;
 const LOCAL_STORAGE_KEY = 'imageOperations';
-const persisted = isomorphicLocalStorage.getItem(LOCAL_STORAGE_KEY);
 
-const getFileName = () => get(currentImageData).fileName;
+const getFileName = () => get(currentImageData)?.fileName;
+const getPersistedOperations = (fileName: string) => {
+	const persisted = isomorphicLocalStorage.getItem(LOCAL_STORAGE_KEY + `_${fileName}`);
+	return persisted ? (JSON.parse(persisted) as Operations) : null;
+};
+
+const queueApplyOperations = throttle(
+	(operations: Operations) => rawProcessorWorker.setAndApplyOperations(operations),
+	500
+);
 
 const createImageOperationsStore = () => {
-	const _imageOperationsByFilename = writable<Record<string, Operations>>(
-		persisted ? JSON.parse(persisted) : {}
-	);
-	// 👇 Sync with localstorage
-	_imageOperationsByFilename.subscribe((value) => {
-		isomorphicLocalStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(value));
+	const _imageOperations = writable<Operations>();
+
+	_imageOperations.subscribe((value) => {
+		// 👇 Sync with localstorage
+		if (value) {
+			isomorphicLocalStorage.setItem(
+				LOCAL_STORAGE_KEY + `_${getFileName()}`,
+				JSON.stringify(value)
+			);
+			// 👇 Queue operations to be applied any time the operations change
+			queueApplyOperations(value);
+		}
 	});
 
 	const retrieveOrInitialiseOperations = (fileName: string) => {
-		const existingOperations = get(_imageOperationsByFilename)[fileName];
-		if (!existingOperations) {
-			_imageOperationsByFilename.update((imageOperations) => {
-				imageOperations[fileName] = defaultOperations;
-				return imageOperations;
-			});
-			return defaultOperations;
-		}
-		// TODO this still seems to be broken
-		return { ...defaultOperations, ...existingOperations }; // 👈 This ensures that if new operations are added, they are backfilled to existing cache
+		const existingOperations = getPersistedOperations(fileName) || {};
+		const retrievedOrInitialisedOperations = { ...defaultOperations, ...existingOperations }; // 👈 This ensures that if new operations are added, they are backfilled to existing cache
+		_imageOperations.set(retrievedOrInitialisedOperations);
+		return retrievedOrInitialisedOperations;
 	};
 
-	/**
-	 * Gets the value of the operation, bound to the current file
-	 */
-	const getOperationValue = <Key extends keyof Operations>(key: Key): Operations[Key] => {
-		const operations = get(_imageOperationsByFilename);
-		return operations[getFileName()][key];
-	};
-
-	/**
-	 * Sets the value of the operation, bound to the current file
-	 */
-	const setOperationValue = <Key extends keyof Operations>(key: Key, value: Operations[Key]) => {
-		const fileName = getFileName();
-		_imageOperationsByFilename.update((imageOperations) => {
-			imageOperations[fileName] = {
-				...imageOperations[fileName],
-				[key]: value
-			};
-			return imageOperations;
-		});
+	const resetOperations = () => {
+		_imageOperations.set({ ...defaultOperations });
 	};
 
 	return {
-		..._imageOperationsByFilename,
+		..._imageOperations,
 		retrieveOrInitialiseOperations,
-		getOperationValue,
-		setOperationValue
+		resetOperations
 	};
 };
 
-export const imageOperationsByFilename = createImageOperationsStore();
+export const imageOperations = createImageOperationsStore();

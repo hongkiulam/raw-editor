@@ -1,17 +1,20 @@
 <script lang="ts">
 	import { createSlider, melt, type CreateSliderProps } from '@melt-ui/svelte';
 	import { onMount } from 'svelte';
-	import { writable } from 'svelte/store';
+	import { get, writable } from 'svelte/store';
 	import { doubleTap } from '../../../helpers/dblTapAction';
 
-	export let base: number;
-	export let min: number;
-	export let max: number;
-	export let value: number;
-	export let step = 0.01;
-	export let label: string;
+	interface Props {
+		base: number;
+		min: number;
+		max: number;
+		value: number;
+		step: number;
+		label: string;
+	}
+	let { base, min, max, value = $bindable(), step, label }: Props = $props();
 
-	const DOUBLE_TAP_RESET_TRANSITION_TIME = 300;
+	const SLIDER_MOVEMENT_TRANSITION_TIME = 300;
 	// Out custom store to provide to the Melt UI Slider
 	// ℹ️ Provide two values to activate the range Slider, while we are not using the range functionality,
 	// it provides us the correct elements to style the slider in the way we want (highlighted mid section)
@@ -19,9 +22,18 @@
 
 	// 👇 This sends the latest value back to the implementor, allowing stuff like bind:value
 	onMount(() => {
-		meltValueStore.subscribe((v) => {
-			value = v[0];
+		meltValueStore.subscribe(([newValue]) => {
+			if (value !== newValue) {
+				value = newValue;
+			}
 		});
+	});
+	// 👇 If changes are made to the value prop from outside of this component, sync it back to melt. e.g. Reset Adjustments
+	$effect(() => {
+		if (value !== get(meltValueStore)[0]) {
+			requestSliderTransition();
+			meltValueStore.set([value]);
+		}
 	});
 
 	/** track if we are dragging, if so we should enable sticking. otherwise don't stick (arrow key usage) */
@@ -78,20 +90,23 @@
 		onValueChange
 	});
 
-	let doubleTapTransitionToBase = false;
+	let transitionSliderMovement = $state(false);
+	const requestSliderTransition = () => {
+		transitionSliderMovement = true;
+		setTimeout(() => {
+			transitionSliderMovement = false;
+		}, SLIDER_MOVEMENT_TRANSITION_TIME); // animation time
+	};
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <span
 	use:melt={$root}
 	class="root"
-	style:--double-tap-reset-transition-duration={DOUBLE_TAP_RESET_TRANSITION_TIME + 'ms'}
-	class:double-tap-transition={doubleTapTransitionToBase}
+	style:--slider-movement-transition-duration={SLIDER_MOVEMENT_TRANSITION_TIME + 'ms'}
+	class:transition-slider-movement={transitionSliderMovement}
 	use:doubleTap={() => {
-		doubleTapTransitionToBase = true;
-		setTimeout(() => {
-			doubleTapTransitionToBase = false;
-		}, DOUBLE_TAP_RESET_TRANSITION_TIME); // animation time
+		requestSliderTransition();
 		meltValueStore.set([base]);
 	}}
 	onpointerdown={setDraggingOn}
@@ -211,10 +226,10 @@
 		/* by default, the thumb should be the same colour as the range, but also this provides a visual element when the thumb is in the middle */
 		background-color: var(--surface-4);
 	}
-	.root.double-tap-transition {
+	.root.transition-slider-movement {
 		.thumb,
 		.range {
-			transition: all var(--double-tap-reset-transition-duration) ease;
+			transition: all var(--slider-movement-transition-duration) ease;
 		}
 	}
 

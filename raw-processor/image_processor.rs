@@ -149,7 +149,6 @@ impl ImageProcessor {
         self.operations.push((
             OperationType::Contrast,
             Box::new(move |image: &mut DynamicImage| {
-                log::info!("contrast: {}", contrast);
                 image
                     .as_mut_rgb16()
                     .unwrap()

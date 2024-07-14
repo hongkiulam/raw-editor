@@ -58,20 +58,38 @@ const rawProcessorWorker = {
 		if (operations.rotation !== 0) {
 			imageProcessor.set_rotation(operations.rotation);
 		}
+		if (operations.contrast !== 0) {
+			imageProcessor.set_contrast(operations.contrast);
+		}
 		applyOperations();
 	},
+	/**
+	 * Loads the current raw file with the operations provided, and applies the operations.
+	 * After applying the operations, the latest image data becomes available via `subscribeToLatestImageData`.
+	 */
+	setAndApplyOperations: (operations: Operations) => {
+		if (currentImageProcessor) {
+			currentImageProcessor.set_exposure(operations.exposure);
+			currentImageProcessor.set_contrast(operations.contrast);
+			currentImageProcessor.set_rotation(operations.rotation);
+			applyOperations();
+		}
+	},
+	/** @deprecated */
 	setExposure: (value: number) => {
 		if (currentImageProcessor) {
 			currentImageProcessor.set_exposure(value);
 			applyOperations();
 		}
 	},
+	/** @deprecated */
 	setContrast: (value: number) => {
 		if (currentImageProcessor) {
 			currentImageProcessor.set_contrast(value);
 			applyOperations();
 		}
 	},
+	/** @deprecated */
 	setRotation: (angle: number) => {
 		if (currentImageProcessor) {
 			currentImageProcessor.set_rotation(angle);

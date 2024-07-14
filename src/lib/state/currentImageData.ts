@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 import * as Comlink from 'comlink';
 import type { SerialisedImageData } from '../workers/raw-processor';
 import { rawProcessorWorker } from '../workers';
-import { imageOperationsByFilename } from './imageOperations';
+import { imageOperations } from './imageOperations';
 
 interface CurrentImageDataState {
 	fileName: string;
@@ -26,7 +26,7 @@ const createCurrentImageDataStore = () => {
 
 	const setNewFile = async (fileName: string, fileData: Uint8Array) => {
 		logger('Handling new file', fileName);
-		const operations = imageOperationsByFilename.retrieveOrInitialiseOperations(fileName);
+		const operations = imageOperations.retrieveOrInitialiseOperations(fileName);
 		logger('Got operations', operations);
 		await rawProcessorWorker.decode(fileData, operations);
 		logger('File decoded');

@@ -3,6 +3,7 @@
 	import { currentImageData } from '../../state/currentImageData';
 	import { canvasState } from '../../state/canvas';
 	import Button from '../Button.svelte';
+	import { imageOperations } from '../../state/imageOperations';
 
 	const {
 		elements: { root, button, link, separator },
@@ -27,6 +28,14 @@
 		}}
 	>
 		Reset Zoom
+	</Button>
+	<Button
+		use_melt={$button}
+		onclick={() => {
+			imageOperations.resetOperations();
+		}}
+	>
+		Reset Adjustments
 	</Button>
 	<Button disabled use_melt={$button}>Export</Button>
 </div>
