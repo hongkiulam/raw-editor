@@ -39,8 +39,8 @@ const createImageOperationsStore = () => {
 	const _imageOperations = writable<Operations>();
 
 	_imageOperations.subscribe((value) => {
-		// 👇 Sync with localstorage
 		if (value) {
+			// 👇 Sync with localstorage
 			isomorphicLocalStorage.setItem(
 				LOCAL_STORAGE_KEY + `_${getFileName()}`,
 				JSON.stringify(value)
