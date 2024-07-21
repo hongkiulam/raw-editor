@@ -1,18 +1,20 @@
 import { get, writable } from 'svelte/store';
 import { currentImageData } from './currentImageData';
 import { rawProcessorWorker } from '../workers';
-import { throttle } from 'lodash-es';
+import { debounce, throttle } from 'lodash-es';
 
 export interface Operations {
 	exposure: number;
 	rotation: number;
 	contrast: number;
+	// saturation: number;
 }
 
 const defaultOperations: Operations = {
 	exposure: 0,
 	rotation: 0,
 	contrast: 0
+	// saturation: 1 // 1 = original color, 0 = grayscale
 };
 
 const isomorphicLocalStorage =
@@ -30,9 +32,9 @@ const getPersistedOperations = (fileName: string) => {
 	return persisted ? (JSON.parse(persisted) as Operations) : null;
 };
 
-const queueApplyOperations = throttle(
+const queueApplyOperations = debounce(
 	(operations: Operations) => rawProcessorWorker.setAndApplyOperations(operations),
-	500
+	350 // intentianally higher than double tap interval
 );
 
 const createImageOperationsStore = () => {

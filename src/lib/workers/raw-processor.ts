@@ -72,6 +72,7 @@ const rawProcessorWorker = {
 			currentImageProcessor.set_exposure(operations.exposure);
 			currentImageProcessor.set_contrast(operations.contrast);
 			currentImageProcessor.set_rotation(operations.rotation);
+			// currentImageProcessor.set_saturation(operations.saturation);
 			applyOperations();
 		}
 	},

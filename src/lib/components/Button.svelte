@@ -12,7 +12,9 @@
 	} = $props();
 </script>
 
-<button {...restProps} {...use_melt} use:use_melt.action>{@render children?.()}</button>
+<button {...restProps} {...use_melt} use:use_melt.action>
+	{@render children?.()}
+</button>
 
 <style>
 	button {

@@ -96,7 +96,10 @@ impl ImageProcessor {
             operation(&mut edited_image);
         }
 
-        // Tone and Color:
+        // Tone and Color: Saturation
+        // if let Some(operation) = deduped_operations.get(&OperationType::Saturation) {
+        //     operation(&mut edited_image);
+        // }
 
         // Optics and Geometry: Rotation
         if let Some(operation) = deduped_operations.get(&OperationType::Rotation) {
@@ -169,6 +172,40 @@ impl ImageProcessor {
         ));
     }
 
+    pub fn set_saturation(&mut self, saturation_level: f32) {
+        self.operations.push((
+            OperationType::Saturation,
+            Box::new(move |image: &mut DynamicImage| {
+                image
+                    .as_mut_rgb16()
+                    .unwrap()
+                    .pixels_mut()
+                    .for_each(|pixel| {
+                        let grayscale_pixel =
+                            ImageProcessor::get_pixel_luminosity([pixel[0], pixel[1], pixel[2]])
+                                as f32;
+
+                        let adjust_saturation_for_pixel = |pixel: &mut u16| {
+                            // Calculate the new pixel value by adjusting its saturation.
+                            // This is done by linearly interpolating between the original pixel value
+                            // and its luminance (a grayscale representation), based on the specified saturation level.
+                            // A saturation level of 1 means no change, while 0 would make the pixel grayscale.
+
+                            let color_intensity_difference = *pixel as f32 - grayscale_pixel;
+
+                            *pixel = (grayscale_pixel
+                                + (saturation_level * color_intensity_difference)) // at 0, pixel is grayscale. at 1, pixel is original color
+                                .clamp(0.0, RGB_MAX_16BIT as f32)
+                                as u16;
+                        };
+                        adjust_saturation_for_pixel(&mut pixel[0]);
+                        adjust_saturation_for_pixel(&mut pixel[1]);
+                        adjust_saturation_for_pixel(&mut pixel[2]);
+                    });
+            }),
+        ));
+    }
+
     // pub fn add_white_balance(&mut self, value: f32) {
     //     self.operations
     //         .push(Box::new(move |image: &mut DynamicImage| {
@@ -202,20 +239,18 @@ impl ImageProcessor {
     //     hist_lum
     // }
 
-    // from claude ai, find a better source?
-    // todo, convert to use u8, probably, depends what we pass into get_histogram
-    fn calculate_luminosity(pixel: [u16; 3]) -> u16 {
-        // Convert to f32 for precision in calculation
+    fn get_pixel_luminosity(pixel: [u16; 3]) -> u16 {
         let r = pixel[0] as f32;
         let g = pixel[1] as f32;
         let b = pixel[2] as f32;
+        // Calculate the luminance of the pixel. Luminance is a measure of the brightness of a color,
+        // calculated as a weighted sum of the R, G, and B components to account for human perception.
+        // The weights (0.3, 0.59, 0.11) reflect the human eye's different sensitivity to these colors.
+        let lum = (0.3 * r) // Weight for Red component contribution
+        + (0.59 * g) // Weight for Green component contribution
+        + (0.11 * b); // Weight for Blue component contribution
 
-        // Calculate luminosity
-        // These coefficients are based on human perception of color
-        let lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-
-        // Convert back to u16 and ensure it's within 0-65535 range
-        lum.round().clamp(0.0, 65535.0) as u16
+        lum.clamp(0.0, RGB_MAX_16BIT as f32) as u16
     }
 
     pub fn process(&mut self) -> Vec<u8> {

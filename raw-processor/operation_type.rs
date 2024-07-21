@@ -5,6 +5,7 @@ pub enum OperationType {
     WhiteBalance,
     Rotation,
     Contrast,
+    // Saturation,
 }
 
 impl PartialEq for OperationType {
