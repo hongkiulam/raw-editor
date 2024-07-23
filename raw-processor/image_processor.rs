@@ -173,37 +173,37 @@ impl ImageProcessor {
     }
 
     pub fn set_saturation(&mut self, saturation_level: f32) {
-        self.operations.push((
-            OperationType::Saturation,
-            Box::new(move |image: &mut DynamicImage| {
-                image
-                    .as_mut_rgb16()
-                    .unwrap()
-                    .pixels_mut()
-                    .for_each(|pixel| {
-                        let grayscale_pixel =
-                            ImageProcessor::get_pixel_luminosity([pixel[0], pixel[1], pixel[2]])
-                                as f32;
+        // self.operations.push((
+        //     OperationType::Saturation,
+        //     Box::new(move |image: &mut DynamicImage| {
+        //         image
+        //             .as_mut_rgb16()
+        //             .unwrap()
+        //             .pixels_mut()
+        //             .for_each(|pixel| {
+        //                 let grayscale_pixel =
+        //                     ImageProcessor::get_pixel_luminosity([pixel[0], pixel[1], pixel[2]])
+        //                         as f32;
 
-                        let adjust_saturation_for_pixel = |pixel: &mut u16| {
-                            // Calculate the new pixel value by adjusting its saturation.
-                            // This is done by linearly interpolating between the original pixel value
-                            // and its luminance (a grayscale representation), based on the specified saturation level.
-                            // A saturation level of 1 means no change, while 0 would make the pixel grayscale.
+        //                 let adjust_saturation_for_pixel = |pixel: &mut u16| {
+        //                     // Calculate the new pixel value by adjusting its saturation.
+        //                     // This is done by linearly interpolating between the original pixel value
+        //                     // and its luminance (a grayscale representation), based on the specified saturation level.
+        //                     // A saturation level of 1 means no change, while 0 would make the pixel grayscale.
 
-                            let color_intensity_difference = *pixel as f32 - grayscale_pixel;
+        //                     let color_intensity_difference = *pixel as f32 - grayscale_pixel;
 
-                            *pixel = (grayscale_pixel
-                                + (saturation_level * color_intensity_difference)) // at 0, pixel is grayscale. at 1, pixel is original color
-                                .clamp(0.0, RGB_MAX_16BIT as f32)
-                                as u16;
-                        };
-                        adjust_saturation_for_pixel(&mut pixel[0]);
-                        adjust_saturation_for_pixel(&mut pixel[1]);
-                        adjust_saturation_for_pixel(&mut pixel[2]);
-                    });
-            }),
-        ));
+        //                     *pixel = (grayscale_pixel
+        //                         + (saturation_level * color_intensity_difference)) // at 0, pixel is grayscale. at 1, pixel is original color
+        //                         .clamp(0.0, RGB_MAX_16BIT as f32)
+        //                         as u16;
+        //                 };
+        //                 adjust_saturation_for_pixel(&mut pixel[0]);
+        //                 adjust_saturation_for_pixel(&mut pixel[1]);
+        //                 adjust_saturation_for_pixel(&mut pixel[2]);
+        //             });
+        //     }),
+        // ));
     }
 
     // pub fn add_white_balance(&mut self, value: f32) {
