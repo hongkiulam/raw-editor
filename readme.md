@@ -1,3 +1,5 @@
+> Abandoned project 🙈 oops, it was fun and i learnt a lot
+
 ### todo
 
 - storing edits either JS side or Rust side, and allow for reconciliation
